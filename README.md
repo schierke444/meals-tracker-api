@@ -1,4 +1,4 @@
-# bookconnect api
+# meals-tracker api
 Backend services for **`meal tracker`**
 
 An App that can track ur meals on the daily basis
