@@ -1,0 +1,106 @@
+version: '3.4'
+
+services:
+  appdb:
+    container_name: appdb
+    restart: always
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      - POSTGRES_USER=${DB_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - appdb-data:/var/lib/postgresql/data
+
+  redis-db:
+    restart: always
+    image: redis
+    container_name: redis-db
+    ports:
+      - 6379:6379
+    volumes:
+      - "redis-db-data:/data"
+
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672 
+
+  pgadmin:
+    restart: always
+    container_name: pgadmin
+    ports:
+      - ${PGA_PORT}:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGA_EMAIL} 
+      PGADMIN_DEFAULT_PASSWORD: ${PGA_PASSWORD} 
+  
+  auth.api:
+    container_name: auth.api
+    depends_on:
+      - appdb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+    ports:
+      - "8001:80"
+
+  category.api:
+     depends_on:
+       - appdb
+       - rabbitmq
+     container_name: category.api
+     environment:
+       - ASPNETCORE_ENVIRONMENT=Development
+       - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+       - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+     ports:
+       - "8002:80"
+     volumes:
+       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+
+  meals.api:
+    container_name: meals.api
+    depends_on:
+      - appdb
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+    ports:
+      - "8003:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+
+  users.api:
+    container_name: users.api
+    depends_on:
+      - appdb
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+    ports:
+      - "8004:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  webapigw:
+    depends_on:
+      - auth.api
+      - category.api
+      - meals.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8010:80"
+
