@@ -32,6 +32,13 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local
     app.UseSwaggerUI();
 }
 
+if(args.Length > 0)
+{
+    var seed = args.Any(x => x == "seed:user_data");
+    if(seed)
+        app.SeedData(builder.Configuration, new PasswordService(builder.Configuration));
+}
+
 
 app.UseSerilogRequestLogging();
 
@@ -40,7 +47,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.SeedData(builder.Configuration, new PasswordService(builder.Configuration));
 
 app.Run();
