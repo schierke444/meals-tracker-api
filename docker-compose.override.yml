@@ -7,7 +7,7 @@ services:
     ports:
       - ${DB_PORT}:5432
     environment:
-      - POSTGRES_USER=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - appdb-data:/var/lib/postgresql/data
@@ -70,7 +70,7 @@ services:
       - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:DB=Host=${DB_HOST};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
       - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     ports:
       - "8003:80"
@@ -86,7 +86,7 @@ services:
       - rabbitmq
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:DB=Host=${DB_HOST};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
       - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     ports:
       - "8004:80"
