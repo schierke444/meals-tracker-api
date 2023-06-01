@@ -21,6 +21,41 @@
         "Limit": 1
       }
     },
+    { 
+    "UpstreamPathTemplate": "/Auth/register",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/v1/Auth/register",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": "2001"
+        }
+      ],
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "5s",
+        "PeriodTimespan": 5,
+        "Limit": 1
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/Auth/refresh",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/v1/Auth/refresh",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": "2001"
+        }
+      ]
+    },
     {
       "UpstreamPathTemplate": "/Category",
       "UpstreamHttpMethod": [
