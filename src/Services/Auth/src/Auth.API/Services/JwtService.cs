@@ -46,6 +46,31 @@ public sealed class JwtService : IJwtService
 
     public bool VerifyRefreshToken(string RefreshToken, out string userId)
     {
-        throw new NotImplementedException();
+        var decoded = new JwtSecurityTokenHandler().ValidateToken(
+            RefreshToken,
+            new TokenValidationParameters
+            {
+                ValidateActor = true,
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _config["Authentication:Issuer"],
+                ValidAudience = _config["Authentication:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_config["Authentication:SecretForKey"] ?? throw new ArgumentNullException()))
+            },
+            out SecurityToken validatedToken 
+        );
+
+        if(validatedToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase) ||
+            decoded.Identity == null ||
+            decoded.Identity.Name == null)
+        {
+            userId = string.Empty;
+            return false;
+        }
+
+        userId = decoded.Identity.Name;
+        return true;
     }
 }
