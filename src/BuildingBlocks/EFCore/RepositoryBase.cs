@@ -51,6 +51,16 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
         return await query.ToListAsync();
     }
 
+    public async Task<IEnumerable<T>> GetAllValues(bool AsNoTracking = true)
+    {
+        IQueryable<T> query = _context.Set<T>();
+
+        if(AsNoTracking)
+            query = query.AsNoTracking();
+
+        return await query.ToListAsync();
+    }
+
     public async Task<T?> GetValue(Expression<Func<T, bool>> expression, bool AsNoTracking = true)
     {
         IQueryable<T> query = _context.Set<T>();
