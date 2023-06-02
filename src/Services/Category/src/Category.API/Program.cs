@@ -5,6 +5,7 @@ using BuildingBlocks.Events;
 using Serilog;
 using Category.API.RequestConsumers;
 using BuildingBlocks.Services;
+using Category.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +17,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
-
+builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddJwtExtensions(builder.Configuration);
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 

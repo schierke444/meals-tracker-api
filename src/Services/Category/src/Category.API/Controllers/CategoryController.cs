@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.JsonPatch;
 using BuildingBlocks.Services;
+using Category.API.Repositories;
 
 namespace Category.API.Controllers;
 
@@ -14,12 +15,12 @@ namespace Category.API.Controllers;
 [Authorize]
 public class CategoryController : BaseController
 {
-    private readonly IApplicationDbContext _context;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly ICurrentUserService _currentUserService;
-    public CategoryController(ICurrentUserService currentUserService, IApplicationDbContext context)
+    public CategoryController(ICurrentUserService currentUserService, ICategoryRepository categoryRepository)
     {
         _currentUserService = currentUserService;
-        _context = context;
+        _categoryRepository = categoryRepository; 
     }
 
     [HttpGet]
@@ -27,7 +28,7 @@ public class CategoryController : BaseController
     {
         try
         {
-            var results = await _context.Categories.AsNoTracking().ToListAsync();
+            var results = await _categoryRepository.GetAllValues(true); 
 
             return Ok(results);
         }
@@ -42,7 +43,7 @@ public class CategoryController : BaseController
     {
         try
         {
-            var result = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id.ToString() == categoryId);
+            var result = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId);
 
             if (result == null)
                 return NotFound(new
@@ -51,8 +52,6 @@ public class CategoryController : BaseController
                 });
 
             return Ok(result);
-
-
         }
         catch (Exception ex)
         {
@@ -70,8 +69,8 @@ public class CategoryController : BaseController
                 Name = addCategory.Name
             };
 
-            await _context.Categories.AddAsync(newCategory, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _categoryRepository.Create(newCategory);
+            await _categoryRepository.SaveChangesAsync(cancellationToken);
 
             return CreatedAtRoute("GetCategoryById", new { categoryId = newCategory.Id }, newCategory.Id);
         }
@@ -86,7 +85,7 @@ public class CategoryController : BaseController
     {
         try
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id.ToString() == categoryId, cancellationToken: cancellationToken);
+            var category = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId, false);
 
             if (category == null)
             {
@@ -105,7 +104,7 @@ public class CategoryController : BaseController
 
             category.Name = categoryToUpdate.Name;
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _categoryRepository.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }
@@ -120,7 +119,7 @@ public class CategoryController : BaseController
     {
         try
         {
-            var result = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id.ToString() == categoryId);
+            var result = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId, false);
 
             if (result == null)
                 return NotFound(new
@@ -128,8 +127,8 @@ public class CategoryController : BaseController
                     message = $"Category with Id '{categoryId}' was not found."
                 });
 
-            _context.Categories.Remove(result);
-            await _context.SaveChangesAsync(cancellationToken);
+            _categoryRepository.Delete(result);
+            await _categoryRepository.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }
