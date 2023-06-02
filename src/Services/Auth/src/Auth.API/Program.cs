@@ -1,5 +1,6 @@
 using Auth.API.Persistence;
 using Auth.API.Persistence.Seeds;
+using Auth.API.Repositories;
 using Auth.API.Services;
 using BuildingBlocks.Jwt;
 using BuildingBlocks.Services;
@@ -15,11 +16,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
+builder.Services.AddDbContext<ApplicationDbContext>();
 
 builder.Services.AddJwtExtensions(builder.Configuration);
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 

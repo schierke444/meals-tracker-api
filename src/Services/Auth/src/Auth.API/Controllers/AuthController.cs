@@ -1,23 +1,23 @@
 ﻿using Auth.API.Entity;
 using Auth.API.Models;
 using Auth.API.Persistence;
+using Auth.API.Repositories;
 using Auth.API.Services;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Auth.API.Controllers;
 
 [Route("api/v1/Auth")]
 public class AuthController : BaseController
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IAuthRepository _authRepository;
     private readonly IPasswordService _passwordService;
     private readonly IJwtService _jwtService;
-    public AuthController(IApplicationDbContext context, IPasswordService passwordService, IJwtService jwtService)
+    public AuthController(IPasswordService passwordService, IJwtService jwtService, IAuthRepository authRepository)
     {
-        _context = context;
+        _authRepository = authRepository;
         _passwordService = passwordService;
         _jwtService = jwtService;
     }
@@ -27,10 +27,10 @@ public class AuthController : BaseController
     {
         try
         {
-            var results = await _context.Users
-                .Where(x => x.Username == loginUser.Username)
-                .Select(u => new UserDetailsDto{ Id = u.Id, Username = u.Username, Password = u.Password})
-                .FirstOrDefaultAsync();
+            var results = await _authRepository.GetValue(
+                x => x.Username == loginUser.Username,
+                x => new UserDetailsDto{ Id = x.Id, Username = x.Username, Password = x.Password}
+            );
 
             if (results == null || !_passwordService.VerifyPassword(results.Password, loginUser.Password))
                 return Unauthorized(new { message = "Invalid Username or Password" });
@@ -65,10 +65,11 @@ public class AuthController : BaseController
     {
         try
         {
-            var results = await _context.Users
-                .Where(x => x.Username.ToLower() == registerUser.Username.ToLower() || x.Email.ToLower() == registerUser.Email.ToLower())
-                .Select(u => new UserDetailsDto { Id = u.Id, Username = u.Username, Password = u.Password })
-                .FirstOrDefaultAsync();
+            var results = await _authRepository.GetValue(
+                x => x.Username.ToLower() == registerUser.Username.ToLower() ||
+                x.Email.ToLower() == registerUser.Email.ToLower(),
+                x => new AuthDetailsDto { Id = x.Id, Username = x.Username} 
+            );
 
             if (results != null)
                 return BadRequest(new { message = "User already taken." });
@@ -81,8 +82,8 @@ public class AuthController : BaseController
                 Email = registerUser.Email
             };
 
-            await _context.Users.AddAsync(newUser, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _authRepository.Create(newUser);
+            await _authRepository.SaveChangesAsync(cancellationToken);
 
             AuthDetailsDto authDetails = new()
             {
@@ -121,7 +122,7 @@ public class AuthController : BaseController
                 return Unauthorized("User Unauthorized.");
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id.ToString() == userId);
+            var user = await _authRepository.GetValue(x => x.Id.ToString() == userId);
             if(user == null)
                 return Unauthorized("User was not found.");
 
