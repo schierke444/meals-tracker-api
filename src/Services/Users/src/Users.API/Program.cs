@@ -1,5 +1,6 @@
 using BuildingBlocks.Events;
 using BuildingBlocks.Jwt;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
 using Serilog;

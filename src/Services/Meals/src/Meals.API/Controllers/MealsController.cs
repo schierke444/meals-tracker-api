@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.Events;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
 using Meals.API.Entities;

@@ -2,6 +2,7 @@
 using Auth.API.Models;
 using Auth.API.Persistence;
 using Auth.API.Services;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

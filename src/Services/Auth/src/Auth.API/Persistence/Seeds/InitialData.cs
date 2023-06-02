@@ -1,5 +1,5 @@
 using Auth.API.Entity;
-using BuildingBlocks.Web;
+using BuildingBlocks.Services;
 
 namespace Auth.API.Persistence.Seeds;
 

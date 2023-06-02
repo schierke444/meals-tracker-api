@@ -3,6 +3,7 @@ using BuildingBlocks.Web;
 using Meals.API.Persistence;
 using MassTransit;
 using Serilog;
+using BuildingBlocks.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

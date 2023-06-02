@@ -1,10 +1,10 @@
 using Category.API.Persistence;
 using BuildingBlocks.Jwt;
-using BuildingBlocks.Web;
 using MassTransit;
 using BuildingBlocks.Events;
 using Serilog;
 using Category.API.RequestConsumers;
+using BuildingBlocks.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

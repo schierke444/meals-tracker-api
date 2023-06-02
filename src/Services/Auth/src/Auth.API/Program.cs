@@ -2,7 +2,7 @@ using Auth.API.Persistence;
 using Auth.API.Persistence.Seeds;
 using Auth.API.Services;
 using BuildingBlocks.Jwt;
-using BuildingBlocks.Web;
+using BuildingBlocks.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

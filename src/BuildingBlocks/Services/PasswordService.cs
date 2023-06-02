@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
-namespace BuildingBlocks.Web;
+namespace BuildingBlocks.Services;
 
 public interface IPasswordService
 {
