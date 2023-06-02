@@ -1,9 +1,11 @@
 using BuildingBlocks.Events;
 using BuildingBlocks.Jwt;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
 using Serilog;
 using Users.API.Persistence;
+using Users.API.Repositories;
 using Users.API.RequestConsumers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +18,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
-
+builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddJwtExtensions(builder.Configuration);
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

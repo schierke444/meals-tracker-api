@@ -22,6 +22,20 @@
       }
     },
     {
+      "UpstreamPathTemplate": "/Auth/refresh",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/v1/Auth/refresh",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth.api",
+          "Port": "80"
+        }
+      ]
+    },
+    {
     "UpstreamPathTemplate": "/Auth/register",
       "UpstreamHttpMethod": [
         "POST"

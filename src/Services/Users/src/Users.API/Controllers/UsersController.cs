@@ -8,9 +8,8 @@ using Users.API.Persistence;
 [Authorize]
 public class UsersController : BaseController
 {
-    private readonly IApplicationDbContext _context;
-    public UsersController(IApplicationDbContext context)
+    public UsersController()
     {
-        _context = context; 
+        
     }  
 }

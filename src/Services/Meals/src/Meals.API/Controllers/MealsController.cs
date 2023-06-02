@@ -1,12 +1,12 @@
 ﻿using BuildingBlocks.Events;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
 using Meals.API.Entities;
 using Meals.API.Models;
-using Meals.API.Persistence;
+using Meals.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Meals.API.Controllers;
 
@@ -14,13 +14,13 @@ namespace Meals.API.Controllers;
 [Authorize]
 public class MealsController : BaseController
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMealsRepository _mealsRepository;
     private readonly IRequestClient<CheckCategoryRecord> _categoryClient;
     private readonly IRequestClient<GetUserByIdRecord> _userClient;
     private readonly ICurrentUserService _currentUserService;
-    public MealsController(IApplicationDbContext context, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient)
+    public MealsController(IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient)
     {
-        _context = context;
+        _mealsRepository = mealsRepository; 
         _userClient = userClient;
         _categoryClient = categoryClient;
         _currentUserService = currentUserService;
@@ -31,7 +31,7 @@ public class MealsController : BaseController
     {
         try
         {
-            var results = await _context.Meals.AsNoTracking().ToListAsync(); 
+            var results = await _mealsRepository.GetAllValues(true);
 
             return Ok(results); 
         }
@@ -46,9 +46,8 @@ public class MealsController : BaseController
     {
         try
         {
-            var results = await _context.Meals
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id.ToString() == mealId);
+            var results = await _mealsRepository.GetValue(x => x.Id.ToString() == mealId);
+            
 
             if (results == null)
                 return NotFound(new
@@ -84,8 +83,8 @@ public class MealsController : BaseController
                 OwnerId = Guid.Parse(_currentUserService.UserId ?? throw new UnauthorizedAccessException())
             };
             
-            await _context.Meals.AddAsync(newMeal);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _mealsRepository.Create(newMeal);
+            await _mealsRepository.SaveChangesAsync(cancellationToken);
 
             return CreatedAtRoute("GetMealById", new {mealId = newMeal.Id}, newMeal.Id);
         }
@@ -100,18 +99,18 @@ public class MealsController : BaseController
     {
         try
         {
-            var results = await _context.Meals
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id.ToString() == mealId);
-
+            // var results = await _context.Meals
+            //     .AsNoTracking()
+            //     .FirstOrDefaultAsync(x => x.Id.ToString() == mealId);
+            var results = await _mealsRepository.GetValue(x => x.Id.ToString() == mealId);
             if (results == null)
                 return NotFound(new
                 {
                     message = $"Meal with Id '{mealId}' was not found."
                 });
 
-            _context.Meals.Remove(results);
-            await _context.SaveChangesAsync(cancellationToken);
+            _mealsRepository.Delete(results);
+            await _mealsRepository.SaveChangesAsync(cancellationToken);
 
             return NoContent(); 
         }

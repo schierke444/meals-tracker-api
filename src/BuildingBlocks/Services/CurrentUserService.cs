@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace BuildingBlocks.Web;
+namespace BuildingBlocks.Services;
 
 public interface ICurrentUserService
 {
