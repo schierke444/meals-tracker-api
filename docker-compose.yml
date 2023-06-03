@@ -49,6 +49,12 @@ services:
       context: .
       dockerfile: src/Services/Ingredients/src/Ingredients.API/Dockerfile
 
+  meal-ingredients.api:
+    image: meal-ingredients.api
+    build:
+      context: .
+      dockerfile: src/Services/MealIngredients/src/MealIngredients.API/Dockerfile
+
 volumes:
   appdb-data:
   redis-db-data:
