@@ -1,4 +1,5 @@
-﻿using BuildingBlocks.Events;
+﻿using BuildingBlocks.Commons.Models.EventModels;
+using BuildingBlocks.Events;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
@@ -18,12 +19,14 @@ public class MealsController : BaseController
     private readonly IRequestClient<CheckCategoryRecord> _categoryClient;
     private readonly IRequestClient<GetUserByIdRecord> _userClient;
     private readonly ICurrentUserService _currentUserService;
-    public MealsController(IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient)
+    private readonly IPublishEndpoint _publishEndpoint;
+    public MealsController(IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient, IPublishEndpoint publishEndpoint)
     {
         _mealsRepository = mealsRepository; 
         _userClient = userClient;
         _categoryClient = categoryClient;
         _currentUserService = currentUserService;
+        _publishEndpoint = publishEndpoint;
     }
 
     [HttpGet]
@@ -85,6 +88,17 @@ public class MealsController : BaseController
             
             await _mealsRepository.Create(newMeal);
             await _mealsRepository.SaveChangesAsync(cancellationToken);
+            
+            // For Publishing an Event to MealIngredients.API 
+            // To have a relationship with Recipes and Ingredients
+            List<CreateMealEventDto> createMealsEvents = new();
+
+            foreach (var mealItem in createMeals.Ingredients)
+            {
+                createMealsEvents.Add(new CreateMealEventDto(newMeal.Id, mealItem, newMeal.OwnerId));
+            }
+
+            await _publishEndpoint.Publish(new CreateMealEvent{MealIngredients = createMealsEvents}, cancellationToken);
 
             return CreatedAtRoute("GetMealById", new {mealId = newMeal.Id}, newMeal.Id);
         }
@@ -99,9 +113,6 @@ public class MealsController : BaseController
     {
         try
         {
-            // var results = await _context.Meals
-            //     .AsNoTracking()
-            //     .FirstOrDefaultAsync(x => x.Id.ToString() == mealId);
             var results = await _mealsRepository.GetValue(x => x.Id.ToString() == mealId);
             if (results == null)
                 return NotFound(new
