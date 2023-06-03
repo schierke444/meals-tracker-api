@@ -42,11 +42,13 @@ services:
     build:
       context: .
       dockerfile: src/ApiGateways/src/WebApiGw/Dockerfile
+      
+  ingredients.api:
+    image: ingredients.api
+    build:
+      context: .
+      dockerfile: src/Services/Ingredients/src/Ingredients.API/Dockerfile
 
 volumes:
   appdb-data:
   redis-db-data:
-
-
-
-
