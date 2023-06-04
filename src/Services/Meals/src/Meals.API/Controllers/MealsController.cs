@@ -18,15 +18,17 @@ public class MealsController : BaseController
     private readonly IMealsRepository _mealsRepository;
     private readonly IRequestClient<CheckCategoryRecord> _categoryClient;
     private readonly IRequestClient<GetUserByIdRecord> _userClient;
+    private readonly IRequestClient<VerifyIngredientByIdRecord> _ingredientClient;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPublishEndpoint _publishEndpoint;
-    public MealsController(IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient, IPublishEndpoint publishEndpoint)
+    public MealsController(IRequestClient<VerifyIngredientByIdRecord> ingredientClient,IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient, IPublishEndpoint publishEndpoint)
     {
         _mealsRepository = mealsRepository; 
         _userClient = userClient;
         _categoryClient = categoryClient;
         _currentUserService = currentUserService;
         _publishEndpoint = publishEndpoint;
+        _ingredientClient = ingredientClient;
     }
 
     [HttpGet]
@@ -72,10 +74,13 @@ public class MealsController : BaseController
         try
         {
             var categoryResponse = await _categoryClient 
-                .GetResponse<CategoryRecordResult>(new CheckCategoryRecord { CategoryId = createMeals.CategoryId});
+                .GetResponse<CategoryRecordResult>(new CheckCategoryRecord { CategoryId = createMeals.CategoryId}, cancellationToken);
 
             var userResponse = await _userClient 
-                .GetResponse<GetUserByIdResult>(new GetUserByIdRecord{ UserId = _currentUserService.UserId ?? string.Empty});
+                .GetResponse<GetUserByIdResult>(new GetUserByIdRecord{ UserId = _currentUserService.UserId ?? string.Empty}, cancellationToken);
+
+            var ingredientResponse = await _ingredientClient
+                .GetResponse<VerifyIngredientByIdResponse>(new VerifyIngredientByIdRecord(createMeals.Ingredients), cancellationToken);
 
             Meal newMeal = new()
             {

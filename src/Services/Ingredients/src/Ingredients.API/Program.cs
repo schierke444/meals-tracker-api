@@ -1,7 +1,10 @@
+using BuildingBlocks.Events;
 using BuildingBlocks.Jwt;
 using BuildingBlocks.Services;
 using Ingredients.API.Persistence;
 using Ingredients.API.Repositories;
+using Ingredients.API.RequestConsumers;
+using MassTransit;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +23,21 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddJwtExtensions(builder.Configuration);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
+
+builder.Services.AddMassTransit(cfg =>
+    {
+        cfg.AddConsumer<VerifyIngredientsByIdConsumer>();
+
+        cfg.AddRequestClient<VerifyIngredientByIdRecord>(new Uri("exchange:check-ingredient-queue"));
+        cfg.UsingRabbitMq((ctx, cfg) =>
+        {
+            cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+            cfg.ReceiveEndpoint("check-ingredient-queue", (cfg) =>
+            {
+                cfg.ConfigureConsumer<VerifyIngredientsByIdConsumer>(ctx);
+            });
+        });
+    });
 
 var app = builder.Build();
 
