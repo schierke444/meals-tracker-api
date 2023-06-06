@@ -1,6 +1,6 @@
 ﻿using BuildingBlocks.Commons.Models;
 
-namespace Auth.API.Entity;
+namespace Auth.Entities;
 
 public class User : BaseEntity
 {

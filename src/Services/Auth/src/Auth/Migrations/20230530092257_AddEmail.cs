@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Auth.API.Migrations
+namespace Auth.Migrations
 {
     /// <inheritdoc />
     public partial class AddEmail : Migration

@@ -1,7 +1,10 @@
-using Auth.API.Entity;
+using Auth.Entities;
 using BuildingBlocks.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Auth.API.Persistence.Seeds;
+namespace Auth.Persistence.Seeds;
 
 public static class InitialData
 {   
@@ -9,7 +12,7 @@ public static class InitialData
     {
         using(var scope = app.Services.CreateScope())
         {
-            using (var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+            using (var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>())
             {
                 try
                 {

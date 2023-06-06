@@ -1,7 +1,7 @@
-using Auth.API.Entity;
+using Auth.Entities;
 using BuildingBlocks.Commons.Interfaces;
 
-namespace Auth.API.Repositories;
+namespace Auth.Repositories;
 
 public interface IAuthRepository : IRepositoryBase<User>
 {
