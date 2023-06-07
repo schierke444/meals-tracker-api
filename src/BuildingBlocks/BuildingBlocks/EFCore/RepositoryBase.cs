@@ -118,4 +118,9 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task BulkCreate(IEnumerable<T> entities)
+    {
+        await _context.Set<T>().AddRangeAsync(entities);
+    }
 }

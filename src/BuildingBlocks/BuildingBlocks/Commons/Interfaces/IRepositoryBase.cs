@@ -12,6 +12,7 @@ public interface IRepositoryBase<T>
     Task<IEnumerable<T>> GetAllValues(Expression<Func<T, bool>>? expression = null, List<Expression<Func<T, object>>>? includes = null, bool AsNoTracking = true);
     Task<IEnumerable<TResponse>> GetAllValues<TResponse>(Expression<Func<T, TResponse>> selector, Expression<Func<T, bool>>? expression = null, List<Expression<Func<T, object>>>? includes = null, bool AsNoTracking = true);
     Task Create(T entity);
+    Task BulkCreate(IEnumerable<T> entities);
     void Delete(T entity);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
