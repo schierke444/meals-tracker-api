@@ -9,10 +9,11 @@ public class ApplicationDbContext : ApplicationDbContextBase
 {
     public DbSet<User> Users => Set<User>();
     private readonly IConfiguration _config;
-    public ApplicationDbContext(IConfiguration config)
+    public ApplicationDbContext(IConfiguration config) : base(config)
     {
-        _config = config;   
+        _config = config;
     }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

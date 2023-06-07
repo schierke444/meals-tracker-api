@@ -93,38 +93,6 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-        
-    
-  ingredients.api:
-    container_name: ingredients.api
-    depends_on:
-      - appdb
-      - rabbitmq
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
-    ports:
-      - "8005:80"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
-  meal-ingredients.api:
-    container_name: meal-ingredients.api
-    depends_on:
-      - appdb
-      - rabbitmq
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
-    ports:
-      - "8006:80"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
 
   webapigw:
     container_name: webapigw
@@ -132,7 +100,6 @@ services:
       - auth.api
       - category.api
       - meals.api
-      - ingredients.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:

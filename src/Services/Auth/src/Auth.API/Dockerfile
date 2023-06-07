@@ -8,7 +8,8 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["src/Services/Auth/src/Auth.API/Auth.API.csproj", "src/Services/Auth/src/Auth.API/"]
-COPY ["src/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/"]
+COPY ["src/Services/Auth/src/Auth/Auth.csproj", "src/Services/Auth/src/Auth/"]
+COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
 RUN dotnet restore "src/Services/Auth/src/Auth.API/Auth.API.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Auth/src/Auth.API"

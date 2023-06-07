@@ -1,8 +1,5 @@
-using Auth.API.Persistence;
-using Auth.API.Persistence.Seeds;
-using Auth.API.Repositories;
-using Auth.API.Services;
-using BuildingBlocks.Jwt;
+using Auth.Extensions;
+using Auth.Persistence.Seeds;
 using BuildingBlocks.Services;
 using Serilog;
 
@@ -16,12 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>();
-
-builder.Services.AddJwtExtensions(builder.Configuration);
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IPasswordService, PasswordService>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
@@ -34,10 +26,11 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local
     app.UseSwaggerUI();
 }
 
-if(args.Length > 0)
+// Manually Seed Data thru CLI using "seed:user_data"
+if (args.Length > 0)
 {
     var seed = args.Any(x => x == "seed:user_data");
-    if(seed)
+    if (seed)
         app.SeedData(builder.Configuration, new PasswordService(builder.Configuration));
 }
 

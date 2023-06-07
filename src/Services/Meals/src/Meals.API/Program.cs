@@ -1,10 +1,6 @@
-using BuildingBlocks.Jwt;
-using BuildingBlocks.Web;
-using Meals.API.Persistence;
 using MassTransit;
+using Meals.Extensions;
 using Serilog;
-using BuildingBlocks.Services;
-using Meals.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,10 +12,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>();
-builder.Services.AddScoped<IMealsRepository, MealsRepository>();
-builder.Services.AddJwtExtensions(builder.Configuration);
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddMassTransit(cfg =>
 {

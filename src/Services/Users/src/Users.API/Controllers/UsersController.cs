@@ -6,7 +6,7 @@ using Users.API.Persistence;
 
 [Route("api/v1/[controller]")]
 [Authorize]
-public class UsersController : BaseController
+public class UsersController : ControllerBase 
 {
     public UsersController()
     {

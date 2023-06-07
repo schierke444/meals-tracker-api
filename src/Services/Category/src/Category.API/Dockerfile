@@ -8,7 +8,8 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["src/Services/Category/src/Category.API/Category.API.csproj", "src/Services/Category/src/Category.API/"]
-COPY ["src/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/"]
+COPY ["src/Services/Category/src/Category/Category.csproj", "src/Services/Category/src/Category/"]
+COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
 RUN dotnet restore "src/Services/Category/src/Category.API/Category.API.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Category/src/Category.API"
