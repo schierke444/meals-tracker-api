@@ -1,13 +1,13 @@
-﻿using BuildingBlocks.Web;
-using CategoryEntity = Category.API.Entities.Category;
-using Category.API.Models;
-using Category.API.Persistence;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.JsonPatch;
 using BuildingBlocks.Services;
-using Category.API.Repositories;
+using BuildingBlocks.Web;
+using MediatR;
+using Category.Features.Queries.GetCategories;
+using Category.Features.Queries.GetCategotyById;
+using Category.Features.Commands.CreateCategory;
+using Category.Features.Commands.DeleteCategory;
+using BuildingBlocks.Commons.Exceptions;
 
 namespace Category.API.Controllers;
 
@@ -15,22 +15,19 @@ namespace Category.API.Controllers;
 [Authorize]
 public class CategoryController : BaseController
 {
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly ICurrentUserService _currentUserService;
-    public CategoryController(ICurrentUserService currentUserService, ICategoryRepository categoryRepository)
+    public CategoryController(IMediator mediator) : base(mediator)
     {
-        _currentUserService = currentUserService;
-        _categoryRepository = categoryRepository; 
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetCategories()
+    public async Task<ActionResult> GetCategories(CancellationToken cancellationToken)
     {
         try
         {
-            var results = await _categoryRepository.GetAllValues(true); 
+           var request = new GetCategoriesQuery();
+           var results = await mediator.Send(request, cancellationToken);
 
-            return Ok(results);
+           return Ok(results);
         }
         catch (Exception ex)
         {
@@ -39,101 +36,90 @@ public class CategoryController : BaseController
     }
 
     [HttpGet("{categoryId}", Name = "GetCategoryById")]
-    public async Task<ActionResult> GetCategoryById(string categoryId)
+    public async Task<ActionResult> GetCategoryById(string categoryId, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId);
+            var request = new GetCategoryByIdQuery(categoryId);
 
-            if (result == null)
-                return NotFound(new
-                {
-                    message = $"Category with Id '{categoryId}' was not found."
-                });
+            var result = await mediator.Send(request, cancellationToken);
 
             return Ok(result);
         }
         catch (Exception ex)
         {
+            if(ex is NotFoundException notFound)
+                return NotFound(new {message = notFound.Message});
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateCategory(AddCategoryDto addCategory, CancellationToken cancellationToken)
+    public async Task<ActionResult> CreateCategory(CreateCategoryCommand createCategory, CancellationToken cancellationToken)
     {
         try
         {
-            CategoryEntity newCategory = new()
-            {
-                Name = addCategory.Name
-            };
-
-            await _categoryRepository.Create(newCategory);
-            await _categoryRepository.SaveChangesAsync(cancellationToken);
-
-            return CreatedAtRoute("GetCategoryById", new { categoryId = newCategory.Id }, newCategory.Id);
+            var result = await mediator.Send(createCategory, cancellationToken);
+            
+            return CreatedAtRoute("GetCategoryById", new { categoryId = result }, result);
         }
         catch (Exception ex)
         {
+            if(ex is ValidationException validation)
+                return BadRequest(new {erorrs = validation.Errors});
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
     }
 
-    [HttpPatch("{categoryId}")]
-    public async Task<ActionResult> CreateCategory(string categoryId, JsonPatchDocument<UpdateCategoryDto> UpdateCategory, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var category = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId, false);
+    // [HttpPatch("{categoryId}")]
+    // public async Task<ActionResult> CreateCategory(string categoryId, JsonPatchDocument<UpdateCategoryDto> UpdateCategory, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         var category = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId, false);
 
-            if (category == null)
-            {
-                return NotFound(new
-                {
-                    message = $"Category with Id '{categoryId}' was not found."
-                });
-            }
+    //         if (category == null)
+    //         {
+    //             return NotFound(new
+    //             {
+    //                 message = $"Category with Id '{categoryId}' was not found."
+    //             });
+    //         }
 
-            var categoryToUpdate = new UpdateCategoryDto()
-            {
-                Name = category.Name,
-            };
+    //         var categoryToUpdate = new UpdateCategoryDto()
+    //         {
+    //             Name = category.Name,
+    //         };
 
-            UpdateCategory.ApplyTo(categoryToUpdate, (err) => BadRequest(new { message = err.ErrorMessage }));
+    //         UpdateCategory.ApplyTo(categoryToUpdate, (err) => BadRequest(new { message = err.ErrorMessage }));
 
-            category.Name = categoryToUpdate.Name;
+    //         category.Name = categoryToUpdate.Name;
 
-            await _categoryRepository.SaveChangesAsync(cancellationToken);
+    //         await _categoryRepository.SaveChangesAsync(cancellationToken);
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
-        }
-    }
+    //         return NoContent();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+    //     }
+    // }
 
     [HttpDelete("{categoryId}")]
     public async Task<ActionResult> DeleteCategory(string categoryId, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _categoryRepository.GetValue(x => x.Id.ToString() == categoryId, false);
+            var request = new DeleteCategoryCommand(categoryId);
 
-            if (result == null)
-                return NotFound(new
-                {
-                    message = $"Category with Id '{categoryId}' was not found."
-                });
-
-            _categoryRepository.Delete(result);
-            await _categoryRepository.SaveChangesAsync(cancellationToken);
+            await mediator.Send(request, cancellationToken);
 
             return NoContent();
         }
         catch (Exception ex)
         {
+            if(ex is NotFoundException notFound)
+                return NotFound(new {message = notFound.Message});
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
     }

@@ -1,8 +1,8 @@
 ﻿using BuildingBlocks.Commons.Models;
 
-namespace Category.API.Entities;
+namespace Category.Entities; 
 
-public class Category : BaseEntity
+public sealed class Category : BaseEntity
 {
     public required string Name { get; set; }
 }
