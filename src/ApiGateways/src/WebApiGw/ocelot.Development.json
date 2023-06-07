@@ -163,7 +163,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ingredients.api",
+          "Host": "meals.api",
           "Port": "80"
         }
       ],
@@ -191,7 +191,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ingredients.api",
+          "Host": "meals.api",
           "Port": "80"
         }
       ],
