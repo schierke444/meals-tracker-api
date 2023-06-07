@@ -7,7 +7,7 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["src/ApiGateways/src/WebApiGw/WebApiGw.csproj", "src/ApiGateways/src/WebApiGw/"]
-COPY ["src/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/"]
+COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
 RUN dotnet restore "src/ApiGateways/src/WebApiGw/WebApiGw.csproj"
 COPY . .
 WORKDIR "/src/src/ApiGateways/src/WebApiGw"
