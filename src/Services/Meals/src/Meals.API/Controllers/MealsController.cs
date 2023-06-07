@@ -1,11 +1,14 @@
-﻿using BuildingBlocks.Commons.Models.EventModels;
+﻿using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Events;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
-using Meals.API.Entities;
-using Meals.API.Models;
-using Meals.API.Repositories;
+using Meals.Commons.Dtos;
+using Meals.Features.Meals.Commands.CreateMeal;
+using Meals.Features.Meals.Commands.DeleteMealById;
+using Meals.Features.Meals.Queries.GetMealById;
+using Meals.Features.Meals.Queries.GetMeals;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,30 +16,27 @@ namespace Meals.API.Controllers;
 
 [Route("api/v1/[controller]")]
 [Authorize]
-public class MealsController : BaseController
+public class MealsController : BaseController 
 {
-    private readonly IMealsRepository _mealsRepository;
     private readonly IRequestClient<CheckCategoryRecord> _categoryClient;
     private readonly IRequestClient<GetUserByIdRecord> _userClient;
-    private readonly IRequestClient<VerifyIngredientByIdRecord> _ingredientClient;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IPublishEndpoint _publishEndpoint;
-    public MealsController(IRequestClient<VerifyIngredientByIdRecord> ingredientClient,IMealsRepository mealsRepository, IRequestClient<CheckCategoryRecord> categoryClient, ICurrentUserService currentUserService,IRequestClient<GetUserByIdRecord> userClient, IPublishEndpoint publishEndpoint)
+
+    public MealsController(IMediator mediator, IRequestClient<CheckCategoryRecord> categoryClient, IRequestClient<GetUserByIdRecord> userClient, ICurrentUserService currentUserService) : base(mediator)
     {
-        _mealsRepository = mealsRepository; 
-        _userClient = userClient;
         _categoryClient = categoryClient;
+        _userClient = userClient;
         _currentUserService = currentUserService;
-        _publishEndpoint = publishEndpoint;
-        _ingredientClient = ingredientClient;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Meal>>> GetMeals()
+    public async Task<ActionResult<IEnumerable<MealsDto>>> GetMeals(CancellationToken cancellationToken)
     {
         try
         {
-            var results = await _mealsRepository.GetAllValues(true);
+            var request = new GetMealsQuery();
+
+            var results = await mediator.Send(request, cancellationToken);
 
             return Ok(results); 
         }
@@ -47,20 +47,15 @@ public class MealsController : BaseController
     }
 
     [HttpGet("{mealId}", Name = "GetMealById")]
-    public async Task<ActionResult<IEnumerable<Meal>>> GetMealById(string mealId)
+    public async Task<ActionResult<MealDetailsDto>> GetMealById(string mealId, CancellationToken cancellationToken)
     {
         try
         {
-            var results = await _mealsRepository.GetValue(x => x.Id.ToString() == mealId);
-            
+            var request = new GetMealByIdQuery(mealId);
 
-            if (results == null)
-                return NotFound(new
-                {
-                    message = $"Meal with Id '{mealId}' was not found."
-                });
+            var result = await mediator.Send(request, cancellationToken);
 
-            return Ok(results); 
+            return Ok(result); 
         }
         catch(Exception ex)
         {
@@ -69,64 +64,36 @@ public class MealsController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateMeals(CreateMealsDto createMeals, CancellationToken cancellationToken)
+    public async Task<ActionResult> CreateMeals(CreateMealCommand createMeal, CancellationToken cancellationToken)
     {
         try
         {
             var categoryResponse = await _categoryClient 
-                .GetResponse<CategoryRecordResult>(new CheckCategoryRecord { CategoryId = createMeals.CategoryId}, cancellationToken);
+                .GetResponse<CategoryRecordResult>(new CheckCategoryRecord { CategoryId = createMeal.CategoryId}, cancellationToken);
 
             var userResponse = await _userClient 
                 .GetResponse<GetUserByIdResult>(new GetUserByIdRecord{ UserId = _currentUserService.UserId ?? string.Empty}, cancellationToken);
 
-            var ingredientResponse = await _ingredientClient
-                .GetResponse<VerifyIngredientByIdResponse>(new VerifyIngredientByIdRecord(createMeals.Ingredients), cancellationToken);
-
-            Meal newMeal = new()
-            {
-                MealName = createMeals.MealName,
-                MealReview = createMeals.MealReview,
-                Rating = createMeals.Rating,
-                CategoryId = Guid.Parse(createMeals.CategoryId),
-                OwnerId = Guid.Parse(_currentUserService.UserId ?? throw new UnauthorizedAccessException())
-            };
+            var result = await mediator.Send(createMeal, cancellationToken);
             
-            await _mealsRepository.Create(newMeal);
-            await _mealsRepository.SaveChangesAsync(cancellationToken);
-            
-            // For Publishing an Event to MealIngredients.API 
-            // To have a relationship with Recipes and Ingredients
-            List<CreateMealEventDto> createMealsEvents = new();
-
-            foreach (var mealItem in createMeals.Ingredients)
-            {
-                createMealsEvents.Add(new CreateMealEventDto(newMeal.Id, mealItem, newMeal.OwnerId));
-            }
-
-            await _publishEndpoint.Publish(new CreateMealEvent{MealIngredients = createMealsEvents}, cancellationToken);
-
-            return CreatedAtRoute("GetMealById", new {mealId = newMeal.Id}, newMeal.Id);
+            return CreatedAtRoute("GetMealById", new {mealId = result}, result);
         }
         catch(Exception ex)
         {
+            if(ex is ValidationException validation)
+                return BadRequest(new {errors = validation.Errors});
             return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
         }
     }
 
     [HttpDelete("{mealId}")] 
-    public async Task<ActionResult<IEnumerable<Meal>>> DeleteMealById(string mealId, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteMealById(string mealId, CancellationToken cancellationToken)
     {
         try
         {
-            var results = await _mealsRepository.GetValue(x => x.Id.ToString() == mealId);
-            if (results == null)
-                return NotFound(new
-                {
-                    message = $"Meal with Id '{mealId}' was not found."
-                });
+            var request = new DeleteMealByIdCommand(mealId);
 
-            _mealsRepository.Delete(results);
-            await _mealsRepository.SaveChangesAsync(cancellationToken);
+            await mediator.Send(request, cancellationToken);
 
             return NoContent(); 
         }
