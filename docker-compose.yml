@@ -37,6 +37,12 @@ services:
       context: .
       dockerfile: src/Services/Users/src/Users.API/Dockerfile
 
+  posts.api:
+    image: ${DOCKER_REGISTRY-}postsapi
+    build:
+      context: .
+      dockerfile: src/Services/Posts/src/Posts.API/Dockerfile
+
   webapigw:
     image: ${DOCKER_REGISTRY-}webapigw
     build:
