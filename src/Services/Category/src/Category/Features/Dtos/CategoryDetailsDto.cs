@@ -1,3 +1,3 @@
-﻿namespace Category.Commons.Dtos;
+﻿namespace Category.Features.Dtos;
 
 public sealed record CategoryDetailsDto(Guid Id, string Name, DateTime CreatedAt, DateTime UpdatedAt): CategoryDto(Id, Name);

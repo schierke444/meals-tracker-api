@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using BuildingBlocks.Services;
+﻿using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Web;
-using MediatR;
-using Category.Features.Queries.GetCategories;
-using Category.Features.Queries.GetCategotyById;
 using Category.Features.Commands.CreateCategory;
 using Category.Features.Commands.DeleteCategory;
-using BuildingBlocks.Commons.Exceptions;
+using Category.Features.Queries.GetCategories;
+using Category.Features.Queries.GetCategotyById;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Category.API.Controllers;
+namespace Category.Features.Controllers;
 
 [Route("api/v1/[controller]")]
 [Authorize]

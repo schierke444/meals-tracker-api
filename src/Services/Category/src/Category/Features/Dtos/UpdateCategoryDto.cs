@@ -1,4 +1,4 @@
-﻿namespace Category.API.Models;
+﻿namespace Category.Features.Dtos;
 
 public sealed class UpdateCategoryDto
 {

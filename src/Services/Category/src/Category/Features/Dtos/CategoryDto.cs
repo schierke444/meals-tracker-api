@@ -1,3 +1,3 @@
-namespace Category.Commons.Dtos;
+namespace Category.Features.Dtos;
 
 public record CategoryDto(Guid Id, string Name);
