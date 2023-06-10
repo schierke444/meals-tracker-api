@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BuildingBlocks.EFCore;
 
-public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntity
+public abstract class RepositoryBase<T> : IReadRepository<T>, IWriteRepository<T> where T : BaseEntity
 {
     protected readonly ApplicationDbContextBase _context;
     protected RepositoryBase(ApplicationDbContextBase context)
@@ -13,18 +13,39 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
         _context = context; 
     }
 
+    public async Task Add(T entity, CancellationToken cancellationToken = default)
+    {
+        await _context.AddAsync(entity, cancellationToken);
+    }
+
+    public void Delete(T entity)
+    {
+        _context.Remove(entity);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddRange(ICollection<T> entities, CancellationToken cancellationToken = default)
+    {
+        await _context.Set<T>().AddRangeAsync(entities, cancellationToken);
+    }
 
     public async Task<T?> GetValue(Expression<Func<T, bool>> expression, bool AsNoTracking = true)
     {
+        
         IQueryable<T> query = _context.Set<T>();
 
         if(AsNoTracking)
             query = query.AsNoTracking();
 
         return await query.FirstOrDefaultAsync(expression);
+
     }
 
-    public async Task<TResponse?> GetValue<TResponse>(Expression<Func<T, bool>> expression, Expression<Func<T, TResponse>> selector , bool AsNoTracking = true)
+    public async Task<TResponse?> GetValue<TResponse>(Expression<Func<T, bool>> expression, Expression<Func<T, TResponse>> selector, bool AsNoTracking = true)
     {
         IQueryable<T> query = _context.Set<T>();
 
@@ -40,87 +61,29 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
 
         if(AsNoTracking)
             query = query.AsNoTracking();
-
-        return await query.ToListAsync();
+        return await query.ToListAsync(); 
     }
 
-    public async Task<IEnumerable<T>> GetAllValues(Expression<Func<T, bool>>? expression = null, bool AsNoTracking = true)
+    public async Task<IEnumerable<T>> GetAllValuesByExp(Expression<Func<T, bool>> expression, bool AsNoTracking = true)
     {
         IQueryable<T> query = _context.Set<T>();
 
         if(AsNoTracking)
             query = query.AsNoTracking();
 
-        if(expression != null)
-            query = query.Where(expression);
-
-        return await query.ToListAsync();
+        return await query.Where(expression).ToListAsync();
     }
 
-    public async Task<IEnumerable<TResponse>> GetAllValues<TResponse>(Expression<Func<T, TResponse>> selector, Expression<Func<T, bool>>? expression = null, bool AsNoTracking = true)
-    { 
-        IQueryable<T> query = _context.Set<T>();
-
-        if(AsNoTracking)
-            query = query.AsNoTracking();
-
-        if(expression != null)
-            query = query.Where(expression);
-
-        return await query.Select(selector).ToListAsync();
-    }
-
-    public async Task<IEnumerable<T>> GetAllValues(Expression<Func<T, bool>>? expression = null, List<Expression<Func<T, object>>>? includes = null, bool AsNoTracking = true)
+    public async Task<IEnumerable<T>> GetAllValuesByExp(Expression<Func<T, bool>> expression, List<Expression<Func<T, object>>>? includes = null, bool AsNoTracking = true)
     {
         IQueryable<T> query = _context.Set<T>();
 
         if(AsNoTracking)
             query = query.AsNoTracking();
-
-        if(expression != null)
-            query = query.Where(expression);
-
-        if(includes != null)
+        
+        if(includes is not null)
             query = includes.Aggregate(query, (context, include) => context.Include(include));
 
-        return await query.ToListAsync();
-    }
-
-    public async Task<IEnumerable<TResponse>> GetAllValues<TResponse>(Expression<Func<T, TResponse>> selector, Expression<Func<T, bool>>? expression = null, List<Expression<Func<T, object>>>? includes = null,
-        bool AsNoTracking = true)
-    {
-        IQueryable<T> query = _context.Set<T>();
-
-        if(AsNoTracking)
-            query = query.AsNoTracking();
-
-        if(expression != null)
-            query = query.Where(expression);
-
-        if(includes != null)
-            query = includes.Aggregate(query, (context, include) => context.Include(include));
-
-        return await query.Select(selector).ToListAsync();
-
-    }
-
-    public async Task Create(T entity)
-    {
-        await _context.AddAsync(entity);
-    }
-
-    public void Delete(T entity)
-    {
-        _context.Remove(entity);
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task BulkCreate(IEnumerable<T> entities)
-    {
-        await _context.Set<T>().AddRangeAsync(entities);
+        return await query.Where(expression).ToListAsync();
     }
 }
