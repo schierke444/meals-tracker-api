@@ -11,4 +11,8 @@ public class AuthDbContext : ApplicationDbContextBase
     public AuthDbContext(IConfiguration Config) : base(Config)
     {
     }
+
+    public AuthDbContext(DbContextOptions options, IConfiguration config) : base(options, config)
+    {
+    }
 }

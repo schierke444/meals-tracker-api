@@ -5,9 +5,10 @@ using Auth.Features.Queries.RefreshUserToken;
 using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Web;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Auth.API.Controllers;
+namespace Auth.Features.Controllers;
 
 [Route("api/v1/Auth")]
 public class AuthController : BaseController

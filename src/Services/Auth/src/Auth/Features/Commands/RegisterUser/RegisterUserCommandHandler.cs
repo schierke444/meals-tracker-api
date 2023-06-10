@@ -1,4 +1,4 @@
-﻿using Auth.Commons.Dtos;
+using Auth.Commons.Dtos;
 using Auth.Entities;
 using Auth.Repositories;
 using Auth.Services;
@@ -40,7 +40,7 @@ sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, (
             Email = request.Email
         };
 
-        await _authRepository.Create(newUser);
+        await _authRepository.Add(newUser);
         await _authRepository.SaveChangesAsync(cancellationToken);
 
         AuthDetailsDto authDetails = new(newUser.Id, newUser.Username, _jwtService.GenerateJwt(newUser.Id, false));
