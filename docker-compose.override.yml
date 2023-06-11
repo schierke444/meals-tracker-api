@@ -115,6 +115,7 @@ services:
       - auth.api
       - category.api
       - meals.api
+      - posts.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
