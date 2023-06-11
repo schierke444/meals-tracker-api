@@ -1,7 +1,6 @@
-﻿
-using BuildingBlocks.Commons.CQRS;
+﻿using BuildingBlocks.Commons.CQRS;
 using Posts.Entities;
-using Posts.Features.Posts.Repositories;
+using Posts.Features.Posts.Interfaces;
 
 namespace Posts.Features.Posts.Commands.CreatePost;
 
@@ -21,7 +20,7 @@ sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand, Guid>
             OwnerId  = request.OwnerId
         };
 
-        await _postRepository.Create(newPost);
+        await _postRepository.Add(newPost);
         await _postRepository.SaveChangesAsync(cancellationToken);
 
         return newPost.Id;

@@ -1,20 +1,23 @@
 ﻿using BuildingBlocks.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Posts.Entities;
 
 namespace Posts.Persistence;
 
 public class PostsDbContext : ApplicationDbContextBase
 {
-    private readonly IConfiguration _config;
+    public DbSet<Post> Posts => Set<Post>();
     public PostsDbContext(IConfiguration config) : base(config)
     {
-        _config = config;
+    }
+
+    public PostsDbContext(DbContextOptions options, IConfiguration config) : base(options, config)
+    {
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_config["ConnectionStrings:DB"]);
         base.OnConfiguring(optionsBuilder);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Commons.Exceptions;
 using MediatR;
-using Posts.Features.Posts.Repositories;
+using Posts.Features.Posts.Interfaces;
 
 namespace Posts.Features.Posts.Commands.DeletePostById;
 

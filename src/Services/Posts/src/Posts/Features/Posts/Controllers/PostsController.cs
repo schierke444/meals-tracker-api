@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Posts.Features.Posts.Commands.CreatePost;
 using Posts.Features.Posts.Commands.DeletePostById;
 using Posts.Features.Posts.Dtos;
+using Posts.Features.Posts.Queries.GetAllPostsByOwnerId;
 using Posts.Features.Posts.Queries.GetPostById;
-using Posts.Features.Posts.Queries.GetPosts;
 
 namespace Posts.Features.Posts.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize]
 public class PostsController : BaseController
 {
     private readonly ICurrentUserService _currentUserService;
@@ -27,7 +28,11 @@ public class PostsController : BaseController
     {
         try
         {
-            GetPostsQuery request = new();
+            var userId = _currentUserService.UserId;
+            if(userId is null)
+                return Unauthorized();
+
+            GetAllPostsByOwnerIdQuery request = new(userId);
 
             var results = await mediator.Send(request);
 
