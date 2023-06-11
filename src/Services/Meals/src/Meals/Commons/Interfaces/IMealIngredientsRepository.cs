@@ -3,7 +3,7 @@ using Meals.Entities;
 
 namespace Meals.Commons.Interfaces;
 
-public interface IMealIngredientsRepository : IRepositoryBase<MealIngredients>
+public interface IMealIngredientsRepository : IReadRepository<MealIngredients>, IWriteRepository<MealIngredients>
 {
     
 }

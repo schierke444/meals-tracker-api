@@ -12,4 +12,8 @@ public class MealsDbContext : ApplicationDbContextBase
     public MealsDbContext(IConfiguration config) : base(config)
     {
     }
+
+    public MealsDbContext(DbContextOptions options, IConfiguration config) : base(options, config)
+    {
+    }
 }

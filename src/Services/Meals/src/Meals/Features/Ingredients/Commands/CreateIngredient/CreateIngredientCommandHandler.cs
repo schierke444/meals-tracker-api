@@ -1,7 +1,7 @@
 using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Commons.Exceptions;
-using Meals.Commons.Interfaces;
 using Meals.Entities;
+using Meals.Features.Ingredients.Interfaces;
 
 namespace Meals.Features.Ingredients.Commands.CreateIngredient;
 
@@ -28,7 +28,7 @@ sealed class CreateIngredientCommandHandler : ICommandHandler<CreateIngredientCo
             Name = request.Name
         };
 
-        await _ingredientsRepository.Create(newIngredient);
+        await _ingredientsRepository.Add(newIngredient);
         await _ingredientsRepository.SaveChangesAsync(cancellationToken);
 
         return newIngredient.Id;

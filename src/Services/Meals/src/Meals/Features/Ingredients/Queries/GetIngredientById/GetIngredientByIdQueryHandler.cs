@@ -1,7 +1,7 @@
 using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Commons.Exceptions;
-using Meals.Commons.Dtos;
-using Meals.Commons.Interfaces;
+using Meals.Features.Ingredients.Dtos;
+using Meals.Features.Ingredients.Interfaces;
 
 namespace Meals.Features.Ingredients.Queries.GetIngredientById;
 

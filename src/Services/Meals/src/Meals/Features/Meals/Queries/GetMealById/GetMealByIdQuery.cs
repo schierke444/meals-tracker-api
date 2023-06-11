@@ -1,5 +1,5 @@
 using BuildingBlocks.Commons.CQRS;
-using Meals.Commons.Dtos;
+using Meals.Features.Meals.Dtos;
 
 namespace Meals.Features.Meals.Queries.GetMealById;
 
