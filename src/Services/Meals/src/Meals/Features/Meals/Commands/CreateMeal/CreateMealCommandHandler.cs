@@ -3,6 +3,7 @@ using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Services;
 using Meals.Commons.Interfaces;
 using Meals.Entities;
+using Meals.Features.Ingredients.Interfaces;
 
 namespace Meals.Features.Meals.Commands.CreateMeal;
 
@@ -35,17 +36,17 @@ sealed class CreateMealCommandHandler : ICommandHandler<CreateMealCommand, Guid>
             OwnerId = Guid.Parse(_currentUserService.UserId ?? throw new UnauthorizedAccessException())
         };
 
-        await _mealsRepository.Create(newMeal);
+        await _mealsRepository.Add(newMeal);
         await _mealsRepository.SaveChangesAsync(cancellationToken);
 
         var mealIngredients = CreateMealWithIngredients(newMeal.Id, request.Ingredients);
-        await _mealIngredientsRepository.BulkCreate(mealIngredients);
+        await _mealIngredientsRepository.AddRange(mealIngredients);
         await _mealIngredientsRepository.SaveChangesAsync(cancellationToken);
 
         return newMeal.Id;
     }
     
-    private IEnumerable<MealIngredients> CreateMealWithIngredients(Guid MealId, IEnumerable<Guid> Ingredients)
+    private ICollection<MealIngredients> CreateMealWithIngredients(Guid MealId, IEnumerable<Guid> Ingredients)
     {
         ICollection<MealIngredients> mealIngredients = new List<MealIngredients>();
 

@@ -20,7 +20,6 @@ public abstract class ApplicationDbContextBase : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_config["ConnectionStrings:DB"]);
         base.OnConfiguring(optionsBuilder);
     }
 

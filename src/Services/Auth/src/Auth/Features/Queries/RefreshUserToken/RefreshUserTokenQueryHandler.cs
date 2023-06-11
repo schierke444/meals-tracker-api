@@ -20,7 +20,7 @@ sealed class RefreshUserTokenQueryHandler : IRequestHandler<RefreshUserTokenQuer
         if(!_jwtService.VerifyRefreshToken(request.RefreshToken, out string userId))
             throw new UnauthorizedAccessException("Invalid Refresh Token");
 
-        var user = await _authRepository.GetValue(x => x.Id.ToString() == userId)
+        var user = await _authRepository.GetUserById(userId)
             ?? throw new UnauthorizedAccessException("User was not found.");
 
         AuthDetailsDto authDetails = new(user.Id, user.Username, _jwtService.GenerateJwt(user.Id, false));

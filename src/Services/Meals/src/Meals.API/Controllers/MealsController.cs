@@ -3,11 +3,11 @@ using BuildingBlocks.Events;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MassTransit;
-using Meals.Commons.Dtos;
 using Meals.Features.Meals.Commands.CreateMeal;
 using Meals.Features.Meals.Commands.DeleteMealById;
+using Meals.Features.Meals.Dtos;
 using Meals.Features.Meals.Queries.GetMealById;
-using Meals.Features.Meals.Queries.GetMeals;
+using Meals.Features.Meals.Queries.GetMealsByOwnerId;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,11 +30,14 @@ public class MealsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MealsDto>>> GetMeals(CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<MealDetailsDto>>> GetMeals(CancellationToken cancellationToken)
     {
         try
         {
-            var request = new GetMealsQuery();
+            var userId = _currentUserService.UserId;
+            if(userId is null)
+                return Unauthorized();
+            var request = new GetMealsByOwnerIdQuery(userId);
 
             var results = await mediator.Send(request, cancellationToken);
 

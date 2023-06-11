@@ -1,5 +1,5 @@
 using BuildingBlocks.Commons.Exceptions;
-using Meals.Commons.Interfaces;
+using Meals.Features.Ingredients.Interfaces;
 using MediatR;
 
 namespace Meals.Features.Ingredients.Commands.DeleteIngredientById;

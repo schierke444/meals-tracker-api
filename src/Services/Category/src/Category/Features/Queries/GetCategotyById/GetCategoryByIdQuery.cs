@@ -1,5 +1,5 @@
 using BuildingBlocks.Commons.CQRS;
-using Category.Commons.Dtos;
+using Category.Features.Dtos;
 
 namespace Category.Features.Queries.GetCategotyById;
 

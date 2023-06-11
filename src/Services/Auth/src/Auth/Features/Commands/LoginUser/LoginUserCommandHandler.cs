@@ -19,12 +19,9 @@ sealed class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, (AuthDe
 
     public async Task<(AuthDetailsDto, string)> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
-        var results = await _authRepository.GetValue(
-                x => x.Username == request.Username,
-                x => new UserDetailsDto(x.Id, x.Username, x.Password)
-                );
+        var results = await _authRepository.GetUserByUsername(request.Username);
 
-        if (results == null || !_passwordService.VerifyPassword(results.Password, request.Password))
+        if (results is null || !_passwordService.VerifyPassword(results.Password, request.Password))
             throw new UnauthorizedAccessException("Invalid Username or Password");
 
         AuthDetailsDto authDetails = new(results.Id, results.Username, _jwtService.GenerateJwt(results.Id, false));

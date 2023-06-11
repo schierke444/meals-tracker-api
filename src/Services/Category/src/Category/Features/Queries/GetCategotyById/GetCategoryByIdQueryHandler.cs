@@ -1,7 +1,7 @@
 using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Commons.Exceptions;
-using Category.Commons.Dtos;
 using Category.Commons.Interfaces;
+using Category.Features.Dtos;
 
 namespace Category.Features.Queries.GetCategotyById;
 

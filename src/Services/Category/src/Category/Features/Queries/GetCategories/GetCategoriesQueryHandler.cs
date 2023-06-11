@@ -1,6 +1,6 @@
 using BuildingBlocks.Commons.CQRS;
-using Category.Commons.Dtos;
 using Category.Commons.Interfaces;
+using Category.Features.Dtos;
 
 namespace Category.Features.Queries.GetCategories;
 
@@ -15,11 +15,7 @@ sealed class GetCategoriesQueryHandler : IQueryHandler<GetCategoriesQuery, IEnum
 
     public async Task<IEnumerable<CategoryDto>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var results = await _categoryRepository.GetAllValues(
-            x => new CategoryDto(x.Id, x.Name),
-            null,
-            true 
-        );
+        var results = await _categoryRepository.GetAllCategories();
 
         return results;
     }

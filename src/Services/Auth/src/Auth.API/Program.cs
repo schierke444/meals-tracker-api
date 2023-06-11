@@ -1,5 +1,4 @@
 using Auth.Extensions;
-using Auth.Persistence.Seeds;
 using BuildingBlocks.Services;
 using Serilog;
 
@@ -25,15 +24,6 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// Manually Seed Data thru CLI using "seed:user_data"
-if (args.Length > 0)
-{
-    var seed = args.Any(x => x == "seed:user_data");
-    if (seed)
-        app.SeedData(builder.Configuration, new PasswordService(builder.Configuration));
-}
-
 
 app.UseSerilogRequestLogging();
 

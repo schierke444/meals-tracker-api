@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Auth.Features.Commands.RegisterUser;
 public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
