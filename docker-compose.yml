@@ -43,11 +43,17 @@ services:
       context: .
       dockerfile: src/Services/Posts/src/Posts.API/Dockerfile
 
-  webapigw:
-    image: ${DOCKER_REGISTRY-}webapigw
+  # webapigw:
+  #   image: ${DOCKER_REGISTRY-}webapigw
+  #   build:
+  #     context: .
+  #     dockerfile: src/ApiGateways/src/WebApiGw/Dockerfile
+
+  nginx-gw:
+    image: ${DOCKER_REGISTRY-}nginx-gw
     build:
       context: .
-      dockerfile: src/ApiGateways/src/WebApiGw/Dockerfile
+      dockerfile: src/ApiGateways/src/nginx/Dockerfile
       
 volumes:
   appdb-data:
