@@ -17,9 +17,6 @@ Tech and Some architecture that has been used for this project
 - [Microsoft.AspNetCore.JsonPatch](https://www.nuget.org/packages/Microsoft.AspNetCore.JsonPatch/8.0.0-preview.3.23177.8) - .NET core support for Json Patch
 - [Microsoft.AspNetCore.Mvc.NewtonsoftJson](https://www.nuget.org/packages/Microsoft.AspNetCore.Mvc.NewtonsoftJson/8.0.0-preview.3.23177.8) - For input and output formatters using Json and Json patch.
 - [Docker](https://www.docker.com/) - For App Containerization.
-
-Soon to be Added
-- [Automapper](https://automapper.org/) - For mapping objects
 - [MedatR](https://www.nuget.org/packages/MediatR) - For Implementing Mediator Pattern and used for communicating internal Services (like an in-memory pub-sub pattern).
 
 ## Installation
