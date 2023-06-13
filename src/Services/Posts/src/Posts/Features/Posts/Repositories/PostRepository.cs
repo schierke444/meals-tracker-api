@@ -25,7 +25,7 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
 
     public async Task<IEnumerable<PostsDto>> GetAllPostsByOwnerId(string OwnerId)
     {
-        var sql = "SELECT Id, Content, Owner_Id, Created_At FROM Posts WHERE Owner_Id::text = @OwnerId";
+        var sql = "SELECT Id, Content, owner_id OwnerId, created_at CreatedAt FROM Posts WHERE Owner_Id::text = @OwnerId";
         var results = await _readDbContext.QueryAsync<PostsDto>(sql, new {OwnerId = OwnerId});
 
         return results;

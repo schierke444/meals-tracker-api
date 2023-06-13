@@ -33,8 +33,8 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
 
     public async Task<IEnumerable<MealsDto>> GetAllMealsByOwnerId(string OwnerId)
     {
-        var sql = "SELECT Id, Meal_Name, Meal_Review, Rating, Created_At FROM Meals WHERE Owner_Id::text = @OwnerId";
-        var results = await _readDbContext.QueryAsync<MealsDto>(sql, new {OwnerId = OwnerId});
+        var sql = "SELECT Id, Meal_Name MealName, Meal_Review MealReview, Rating, Created_At CreatedAt FROM Meals WHERE Owner_Id::text = @OwnerId";
+        var results = await _readDbContext.QueryAsync<MealsDto>(sql, new { OwnerId });
 
         return results;
     }

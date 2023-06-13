@@ -109,14 +109,29 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  webapigw:
-    container_name: webapigw
+  # webapigw:
+  #   container_name: webapigw
+  #   depends_on:
+  #     - auth.api
+  #     - category.api
+  #     - meals.api
+  #     - posts.api
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #   ports:
+  #     - "8010:80"
+
+  nginx-gw:
+    container_name: nginx-gw 
     depends_on:
       - auth.api
       - category.api
       - meals.api
       - posts.api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - NGINX_JWT_SECRET=${NGINX_JWT_SECRET}
+      - NGINX_JWT_AUD=${NGINX_JWT_AUD}
+      - NGINX_JWT_ISS=${NGINX_JWT_ISS}
+      - NGINX_CLIENT_URL=${NGINX_CLIENT_URL}
     ports:
-      - "8010:80"
+      - "8011:80"
