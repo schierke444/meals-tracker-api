@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Features.Controllers;
 
-[Route("api/v1/Auth")]
+[Route("[controller]/v1")]
 public class AuthController : BaseController
 {
     public AuthController(IMediator mediator) : base(mediator)

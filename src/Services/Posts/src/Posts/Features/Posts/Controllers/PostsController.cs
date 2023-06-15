@@ -13,7 +13,7 @@ using Posts.Features.Posts.Queries.GetPostById;
 namespace Posts.Features.Posts.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("[controller]/v1/posts")]
 [Authorize]
 public class PostsController : BaseController
 {
@@ -95,7 +95,7 @@ public class PostsController : BaseController
                 return Unauthorized();
 
             DeletePostByIdCommand request = new(postId, userId);
-            var result = await mediator.Send(postId);
+            var result = await mediator.Send(request);
 
             return NoContent();
         }

@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Meals.API.Controllers;
 
-[Route("api/v1/[controller]")]
+[Route("Meals/v1/meals")]
 [Authorize]
 public class MealsController : BaseController 
 {

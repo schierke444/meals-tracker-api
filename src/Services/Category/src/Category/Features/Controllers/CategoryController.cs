@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Category.Features.Controllers;
 
-[Route("api/v1/[controller]")]
+[Route("[controller]/v1/category")]
 [Authorize]
 public class CategoryController : BaseController
 {
