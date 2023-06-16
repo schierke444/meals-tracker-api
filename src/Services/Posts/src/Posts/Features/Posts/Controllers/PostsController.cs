@@ -24,7 +24,7 @@ public class PostsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostsDto>>> GetPosts()
+    public async Task<ActionResult<IEnumerable<PostsDto>>> GetPosts(int page = 1, int pageSize = 10)
     {
         try
         {
@@ -32,7 +32,7 @@ public class PostsController : BaseController
             if(userId is null)
                 return Unauthorized();
 
-            GetAllPostsByOwnerIdQuery request = new(userId);
+            GetAllPostsByOwnerIdQuery request = new(page, pageSize, userId);
 
             var results = await mediator.Send(request);
 
