@@ -6,7 +6,8 @@ namespace Meals.Commons.Interfaces;
 
 public interface IMealsRepository : IReadRepository<Meal>, IWriteRepository<Meal>
 {
+    Task<int> GetMealsCountByOwnerId(string OwnerId);
     Task<IEnumerable<MealsDto>> GetAllMeals();
     Task<MealDetailsDto> GetMealsById(string MealId);
-    Task<IEnumerable<MealsDto>> GetAllMealsByOwnerId(string OwnerId);
+    Task<IEnumerable<MealsDto>> GetAllMealsByOwnerId(string OwnerId, int page = 1, int pageSize =10);
 }
