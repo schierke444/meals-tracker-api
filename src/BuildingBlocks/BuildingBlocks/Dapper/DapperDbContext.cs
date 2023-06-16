@@ -44,4 +44,9 @@ public abstract class DapperDbContext: IReadDbContext, IDisposable
     {
         return await connection.QuerySingleOrDefaultAsync<T>(sql, param, transaction);
     }
+
+    public async Task<T> ExecuteScalarAsync<T>(string sql, object? param = null, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+    {
+        return await connection.ExecuteScalarAsync<T>(sql, param, transaction);
+    }
 }
