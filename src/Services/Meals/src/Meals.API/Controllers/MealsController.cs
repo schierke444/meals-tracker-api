@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Meals.API.Controllers;
 
-[Route("api/v1/[controller]")]
+[Route("Meals/v1/meals")]
 [Authorize]
 public class MealsController : BaseController 
 {
@@ -30,14 +30,14 @@ public class MealsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MealDetailsDto>>> GetMeals(CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<MealDetailsDto>>> GetMeals(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = _currentUserService.UserId;
             if(userId is null)
                 return Unauthorized();
-            var request = new GetMealsByOwnerIdQuery(userId);
+            var request = new GetMealsByOwnerIdQuery(userId, page, pageSize);
 
             var results = await mediator.Send(request, cancellationToken);
 

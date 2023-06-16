@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ingredients.API.Controllers;
 
-[Route("api/v1/[controller]")]
+[Route("Meals/v1/ingredients")]
 [Authorize]
 public class IngredientsController : BaseController 
 {

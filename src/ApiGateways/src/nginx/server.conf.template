@@ -22,7 +22,7 @@ server {
 
     location /Auth {
         #limit_req zone=mylimit;
-        proxy_pass http://auth_api/api/v1/Auth;
+        proxy_pass http://auth_api/Auth;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;
@@ -39,7 +39,7 @@ server {
             add_header 'Access-Control-Max-Age' 86400;
             add_header 'Cache-Control' "public, max-age=86400";
             add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
+            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
             add_header 'Access-Control-Allow-Credentials' 'true' always;
             add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
             return 200;
@@ -52,7 +52,7 @@ server {
         auth_jwt_require $valid_jwt_iss $valid_jwt_aud;
         auth_jwt_key "${NGINX_JWT_SECRET}";
 
-        proxy_pass http://category_api/api/v1/Category;
+        proxy_pass http://category_api/Category;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;
@@ -67,7 +67,7 @@ server {
             add_header 'Access-Control-Max-Age' 86400;
             add_header 'Cache-Control' "public, max-age=86400";
             add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
+            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
             add_header 'Access-Control-Allow-Credentials' 'true' always;
             add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
             return 200;
@@ -80,7 +80,7 @@ server {
         auth_jwt_require $valid_jwt_iss $valid_jwt_aud;
         auth_jwt_key "${NGINX_JWT_SECRET}";
 
-        proxy_pass http://meals_api/api/v1/Meals;
+        proxy_pass http://meals_api/Meals;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;
@@ -91,11 +91,11 @@ server {
         proxy_set_header    X-Forwarded-Host $server_name;
         proxy_hide_header 'Access-Control-Allow-Origin';
         
-        if ($request_method = OPTIONS ) {
+       if ($request_method = OPTIONS ) {
             add_header 'Access-Control-Max-Age' 86400;
             add_header 'Cache-Control' "public, max-age=86400";
             add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
+            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
             add_header 'Access-Control-Allow-Credentials' 'true' always;
             add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
             return 200;
@@ -108,7 +108,7 @@ server {
         auth_jwt_require $valid_jwt_iss $valid_jwt_aud;
         auth_jwt_key "${NGINX_JWT_SECRET}";
 
-        proxy_pass http://posts_api/api/v1/Posts;
+        proxy_pass http://posts_api/Posts;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;
@@ -123,7 +123,7 @@ server {
             add_header 'Access-Control-Max-Age' 86400;
             add_header 'Cache-Control' "public, max-age=86400";
             add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
+            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
             add_header 'Access-Control-Allow-Credentials' 'true' always;
             add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
             return 200;
