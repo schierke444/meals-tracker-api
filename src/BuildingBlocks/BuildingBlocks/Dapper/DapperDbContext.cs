@@ -1,8 +1,8 @@
 using System.Data;
 using BuildingBlocks.Commons.Interfaces;
 using Dapper;
+using DapperQueryBuilder;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace BuildingBlocks.Dapper;
 
