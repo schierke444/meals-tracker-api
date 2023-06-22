@@ -20,11 +20,17 @@ public class CategoryController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetCategories(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetCategories(
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-           var request = new GetCategoriesQuery();
+           var request = new GetCategoriesQuery(search, sortColumn, sortOrder, page, pageSize);
            var results = await mediator.Send(request, cancellationToken);
 
            return Ok(results);

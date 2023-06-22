@@ -1,10 +1,11 @@
 using BuildingBlocks.Commons.CQRS;
+using BuildingBlocks.Commons.Models;
 using Meals.Features.Ingredients.Dtos;
 using Meals.Features.Ingredients.Interfaces;
 
 namespace Meals.Features.Ingredients.Queries.GetIngredients;
 
-sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, IEnumerable<IngredientsDto>>
+sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, PaginatedResults<IngredientDetailsDto>>
 {
     private readonly IIngredientsRepository _ingredientsRepository;
 
@@ -13,9 +14,15 @@ sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, IEn
         _ingredientsRepository = ingredientsRepository;
     }
 
-    public async Task<IEnumerable<IngredientsDto>> Handle(GetIngredientsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResults<IngredientDetailsDto>> Handle(GetIngredientsQuery request, CancellationToken cancellationToken)
     {
-        var results = await _ingredientsRepository.GetAllIngredients();
+        var results = await _ingredientsRepository.GetPagedIngredientList(
+            request.Search,
+            request.SortColumn,
+            request.SortOrder,
+            request.Page,
+            request.PageSize
+        );
 
         return results; 
     }

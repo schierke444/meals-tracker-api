@@ -1,4 +1,5 @@
-﻿using BuildingBlocks.Services;
+﻿using BuildingBlocks.Commons.Exceptions;
+using BuildingBlocks.Services;
 using BuildingBlocks.Web;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +25,11 @@ public class PostsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostsDto>>> GetPosts(int page = 1, int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<PostsDto>>> GetPosts(
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10)
     {
         try
         {
@@ -32,7 +37,7 @@ public class PostsController : BaseController
             if(userId is null)
                 return Unauthorized();
 
-            GetAllPostsByOwnerIdQuery request = new(page, pageSize, userId);
+            GetAllPostsByOwnerIdQuery request = new(sortColumn, sortOrder, page, pageSize, userId);
 
             var results = await mediator.Send(request);
 
@@ -61,6 +66,8 @@ public class PostsController : BaseController
         }
         catch(Exception ex)
         {
+            if(ex is NotFoundException notFound)
+                return NotFound(new {message = notFound.Message});
             return StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message});
         }
     }
@@ -81,6 +88,8 @@ public class PostsController : BaseController
         }
         catch(Exception ex)
         {
+            if(ex is ValidationException validation)
+                return BadRequest(new {errors = validation.Errors});
             return StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message});
         }
     }
@@ -101,6 +110,8 @@ public class PostsController : BaseController
         }
         catch(Exception ex)
         {
+            if(ex is NotFoundException notFound)
+                return NotFound(new {message = notFound.Message});
             return StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message});
         }
     }

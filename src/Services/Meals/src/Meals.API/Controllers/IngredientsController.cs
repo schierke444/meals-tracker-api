@@ -19,11 +19,17 @@ public class IngredientsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetIngredients(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetIngredients(
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new GetIngredientsQuery();
+            var request = new GetIngredientsQuery(search, sortColumn, sortOrder, page, pageSize);
             var results = await mediator.Send(request, cancellationToken);
             return Ok(results);
         }

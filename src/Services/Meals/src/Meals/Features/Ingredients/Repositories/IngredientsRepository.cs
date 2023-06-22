@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.Commons.Interfaces;
+using BuildingBlocks.Commons.Models;
 using BuildingBlocks.EFCore;
 using Meals.Entities;
 using Meals.Features.Ingredients.Dtos;
@@ -17,12 +18,39 @@ public sealed class IngredientsRepository : RepositoryBase<Ingredient>, IIngredi
         _readDbContext = readDbContext;
     }
 
-    public async Task<IEnumerable<IngredientsDto>> GetAllIngredients()
+    public async Task<PaginatedResults<IngredientDetailsDto>> GetPagedIngredientList(
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10
+    )
     {
-        var sql = "SELECT Id, Name From Ingredients";
-        var results = await _readDbContext.QueryAsync<IngredientsDto>(sql);
+        var sql = @"SELECT Id, Name, created_at CreatedAt, updated_at UpdatedAt
+                    FROM Ingredients";
 
-        return results;
+        var totalItemsSql = @"SELECT COUNT(Id) 
+                            FROM Ingredients";
+
+        if(!string.IsNullOrEmpty(search))
+        {
+            var where = $" WHERE Name LIKE '%{search}%' ";
+            sql += where;
+            totalItemsSql += where;
+        }
+
+        sql += sortOrder == "desc" ? $" ORDER BY {GetColumn(sortColumn)} DESC" : $" ORDER BY {GetColumn(sortColumn)}";
+
+        var totalItems = await _readDbContext.ExecuteScalarAsync<int>(totalItemsSql);
+        var pageData = new PageMetadata(page, pageSize, totalItems);
+        
+        sql += $" LIMIT {pageSize}";
+        sql += $" OFFSET {pageSize * (page - 1)}";        
+
+        var results = await _readDbContext.QueryAsync<IngredientDetailsDto>(sql);
+
+        PaginatedResults<IngredientDetailsDto> paginated = new(results, pageData);
+        return paginated;
     }
 
     public async Task<IngredientDetailsDto> GetIngredientById(string ingredientId)
@@ -50,4 +78,17 @@ public sealed class IngredientsRepository : RepositoryBase<Ingredient>, IIngredi
 
         return result;
     }
+    private static string GetColumn(string? sortColumn)
+    {
+        var s = sortColumn?.ToLower() switch {
+            "content" => "content",
+            "name" => "name",
+            "created_at" => "created_at",
+            "updated_at" => "updated_at",
+            _ => $"Id"
+        };
+
+        return s;
+    }
+
 }
