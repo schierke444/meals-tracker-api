@@ -3,6 +3,7 @@ using Meals.Features.Ingredients.Commands.CreateIngredient;
 using Meals.Features.Ingredients.Commands.DeleteIngredientById;
 using Meals.Features.Ingredients.Queries.GetIngredientById;
 using Meals.Features.Ingredients.Queries.GetIngredients;
+using Meals.Features.Ingredients.Queries.GetIngredientsByMealId;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -19,11 +20,17 @@ public class IngredientsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetIngredients(CancellationToken cancellationToken)
+    public async Task<ActionResult> GetIngredients(
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new GetIngredientsQuery();
+            var request = new GetIngredientsQuery(search, sortColumn, sortOrder, page, pageSize);
             var results = await mediator.Send(request, cancellationToken);
             return Ok(results);
         }
@@ -39,6 +46,37 @@ public class IngredientsController : BaseController
         try
         {
             var request = new GetIngredientByIdQuery(ingredientId);
+
+            var result = await mediator.Send(request, cancellationToken);
+
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = e.Message });
+        }
+    }
+
+    [HttpGet("{mealId}/list", Name = "GetIngredientsByMealId")]
+    public async Task<ActionResult> GetIngredientsByMealId(
+        string mealId, 
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new GetIngredientsByMealIdQuery(
+                mealId,
+                search,
+                sortColumn,
+                sortOrder,
+                page,
+                pageSize
+            );
 
             var result = await mediator.Send(request, cancellationToken);
 

@@ -6,7 +6,9 @@ public class PageMetadata
     public int PageSize { get; set; }
     public int TotalItemsCount { get; set; }
     public int TotalPageCount { get; set; }
-
+    public bool HasNextPage => TotalPageCount > CurrentPage;
+    public bool HasPreviousPage => CurrentPage > 1;
+    
     public PageMetadata(int currentPage, int pageSize, int totalItemsCount)
     {
         CurrentPage = currentPage;

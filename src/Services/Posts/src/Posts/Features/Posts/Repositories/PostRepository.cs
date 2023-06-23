@@ -4,6 +4,10 @@ using Posts.Entities;
 using Posts.Features.Posts.Dtos;
 using Posts.Features.Posts.Interfaces;
 using Posts.Persistence;
+using Dapper;
+using DapperQueryBuilder;
+using BuildingBlocks.Dapper;
+using BuildingBlocks.Commons.Models;
 
 namespace Posts.Features.Posts.Repositories;
 
@@ -23,26 +27,46 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
         return results;
     }
 
-    public async Task<IEnumerable<PostDetailsDto>> GetAllPostsByOwnerId(string OwnerId, int page = 1, int pageSize = 10)
+    public async Task<PaginatedResults<PostDetailsDto>> GetPagedPostListByOwnerId(
+        string OwnerId,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1, int pageSize = 10)
     {
-
-        var sql = @"SELECT p.Id, p.Content, p.created_at CreatedAt, p.updated_at UpdatedAt, u.Id, u.Username
+        var sql = $@"
+                    SELECT p.Id, p.Content, p.created_at CreatedAt, p.updated_at UpdatedAt, u.Id, u.Username
                     FROM Posts p
                     INNER JOIN Users u ON u.Id = p.Owner_Id
-                    WHERE Owner_Id::text = @OwnerId " +
-                    $"LIMIT {pageSize} " +
-                    $"OFFSET {pageSize * (page - 1)}";
+                    WHERE Owner_Id::text = @OwnerId 
+                    ";
+
+        var totalItemsSql = $@"
+                    SELECT COUNT(p.id) 
+                    FROM Posts p
+                    WHERE Owner_Id::text = @OwnerId 
+                    ";
+
+        sql += sortOrder == "desc" ? $" ORDER BY {GetColumn(sortColumn)} DESC" : $" ORDER BY {GetColumn(sortColumn)}";
+
+        var totalItems = await _readDbContext.ExecuteScalarAsync<int>(totalItemsSql, param: new {OwnerId});
+        var pageData = new PageMetadata(page, pageSize, totalItems);
+        
+        sql += $" LIMIT {pageSize}";
+        sql += $" OFFSET {pageSize * (page - 1)}";
+        
         var results = await _readDbContext.QueryMapAsync<PostDetailsDto, UserDetailsDto, PostDetailsDto>(
             sql,
             map: (posts, users) => {
                 posts.Owner = users;
                 return posts;
             },
-            param: new { OwnerId = OwnerId},
+            param: new {OwnerId},
             splitOn: "Id"
         );
 
-        return results;
+        PaginatedResults<PostDetailsDto> paginated = new(results, pageData);
+
+        return paginated;
     }
 
     public async Task<PostDetailsDto> GetPostById(string PostId)
@@ -68,4 +92,16 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
 
         return result;
     }
+
+     private static string GetColumn(string? sortColumn)
+    {
+        var s = sortColumn?.ToLower() switch {
+            "content" => $"p.content",
+            "created_at" => $"p.created_at",
+            "updated_at" => $"p.updated_at",
+            _ => $"p.Id"
+        };
+
+        return s;
+    } 
 }

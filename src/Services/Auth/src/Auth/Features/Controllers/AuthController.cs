@@ -1,5 +1,6 @@
 ﻿using Auth.Commons.Dtos;
 using Auth.Features.Commands.LoginUser;
+using Auth.Features.Commands.LogoutUser;
 using Auth.Features.Commands.RegisterUser;
 using Auth.Features.Queries.RefreshUserToken;
 using BuildingBlocks.Commons.Exceptions;
@@ -37,7 +38,7 @@ public class AuthController : BaseController
             if(ex is ValidationException validation)
                 return BadRequest(new {errors = validation.Errors});
             if(ex is UnauthorizedAccessException unauthorized)
-                return BadRequest(new {message = unauthorized.Message});
+                return Unauthorized(new {message = unauthorized.Message});
             return StatusCode(StatusCodes.Status500InternalServerError,
             new { message = ex.Message,});
         }
@@ -96,6 +97,29 @@ public class AuthController : BaseController
         {
             if(ex is UnauthorizedAccessException unauthorized)
                 return BadRequest(new {message = unauthorized.Message});
+            return StatusCode(StatusCodes.Status500InternalServerError,
+            new { message = ex.Message,});
+        }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutUser(CancellationToken cancellationToken)
+    {
+        try
+        {
+            LogoutUserCommand request = new();   
+            await mediator.Send(request);
+            Response.Cookies.Delete("rt", new CookieOptions
+            {
+                HttpOnly = true,
+                MaxAge = TimeSpan.Zero
+            });
+            return Ok(); 
+        }
+        catch(Exception ex)
+        {
+            if(ex is UnauthorizedAccessException unauthorized)
+                return Unauthorized(new {message = unauthorized.Message});
             return StatusCode(StatusCodes.Status500InternalServerError,
             new { message = ex.Message,});
         }

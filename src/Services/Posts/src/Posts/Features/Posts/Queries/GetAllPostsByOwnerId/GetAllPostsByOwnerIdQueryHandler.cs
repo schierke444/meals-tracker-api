@@ -14,10 +14,8 @@ sealed class  GetAllPostsByOwnerIdQueryHandler : IQueryHandler<GetAllPostsByOwne
     }
     public async Task<PaginatedResults<PostDetailsDto>> Handle(GetAllPostsByOwnerIdQuery request, CancellationToken cancellationToken)
     {
-        var results = await _postRepository.GetAllPostsByOwnerId(request.OwnerId, request.page, request.PageSize);
-        var totalItems = await _postRepository.GetPostsCountByOwnerId(request.OwnerId);
-
-        PageMetadata p = new(request.page, request.PageSize, totalItems);
-        return new PaginatedResults<PostDetailsDto>(results, p);
+        var results = await _postRepository.GetPagedPostListByOwnerId(request.OwnerId, request.sortColumn, request.sortOrder, request.page, request.PageSize);
+        
+        return results;
     }
 }

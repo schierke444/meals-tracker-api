@@ -5,7 +5,7 @@ using Meals.Features.Meals.Dtos;
 
 namespace Meals.Features.Meals.Queries.GetMealsByOwnerId;
 
-sealed class GetMealsByOwnerIdQueryHandler : IQueryHandler<GetMealsByOwnerIdQuery, PaginatedResults<MealsDto>>
+sealed class GetMealsByOwnerIdQueryHandler : IQueryHandler<GetMealsByOwnerIdQuery, PaginatedResults<MealDetailsDto>>
 {
     private readonly IMealsRepository _mealsRepository;
     public GetMealsByOwnerIdQueryHandler(IMealsRepository mealsRepository)
@@ -13,13 +13,17 @@ sealed class GetMealsByOwnerIdQueryHandler : IQueryHandler<GetMealsByOwnerIdQuer
         _mealsRepository = mealsRepository;
     }
 
-    public async Task<PaginatedResults<MealsDto>> Handle(GetMealsByOwnerIdQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResults<MealDetailsDto>> Handle(GetMealsByOwnerIdQuery request, CancellationToken cancellationToken)
     {
-        var results = await _mealsRepository.GetAllMealsByOwnerId(request.OwnerId, request.Page, request.PageSize);
-        var totalMealsCount = await _mealsRepository.GetMealsCountByOwnerId(request.OwnerId);
+        var results = await _mealsRepository.GetPagedMealsListByOwnerId(
+            request.OwnerId, 
+            request.Search,
+            request.SortColumn,
+            request.SortOrder,
+            request.Page, 
+            request.PageSize);
 
-        PageMetadata p = new(request.Page, request.PageSize, totalMealsCount);
 
-        return new PaginatedResults<MealsDto>(results, p);
+        return results;
     }
 }

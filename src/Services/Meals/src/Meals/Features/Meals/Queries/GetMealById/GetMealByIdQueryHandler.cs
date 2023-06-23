@@ -16,10 +16,8 @@ sealed class GetMealByIdQueryHandler : IQueryHandler<GetMealByIdQuery, MealDetai
 
     public async Task<MealDetailsDto> Handle(GetMealByIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await _mealsRepository.GetValue(
-            x => x.Id.ToString() == request.MealId,
-            x => new MealDetailsDto(x.Id, x.MealName, x.MealReview, x.Rating, x.CategoryId, x.OwnerId, x.CreatedAt, x.UpdatedAt)
-        ) ?? throw new NotFoundException($"Meal with Id '{request.MealId}' was not found.");
+        var result = await _mealsRepository.GetMealsById(request.MealId)
+         ?? throw new NotFoundException($"Meal with Id '{request.MealId}' was not found.");
 
         return result;
     }
