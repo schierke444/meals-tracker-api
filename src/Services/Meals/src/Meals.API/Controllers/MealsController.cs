@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.Commons.Exceptions;
+using BuildingBlocks.Commons.Models;
 using BuildingBlocks.Events;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
@@ -30,14 +31,26 @@ public class MealsController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MealDetailsDto>>> GetMeals(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<PaginatedResults<MealDetailsDto>>> GetMeals(
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1, 
+        int pageSize = 10, 
+        CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = _currentUserService.UserId;
             if(userId is null)
                 return Unauthorized();
-            var request = new GetMealsByOwnerIdQuery(userId, page, pageSize);
+            var request = new GetMealsByOwnerIdQuery(
+                userId, 
+                search,
+                sortColumn,
+                sortOrder,
+                page, 
+                pageSize);
 
             var results = await mediator.Send(request, cancellationToken);
 
@@ -73,9 +86,6 @@ public class MealsController : BaseController
         {
             var categoryResponse = await _categoryClient 
                 .GetResponse<CategoryRecordResult>(new CheckCategoryRecord { CategoryId = createMeal.CategoryId}, cancellationToken);
-
-            var userResponse = await _userClient 
-                .GetResponse<GetUserByIdResult>(new GetUserByIdRecord{ UserId = _currentUserService.UserId ?? string.Empty}, cancellationToken);
 
             var result = await mediator.Send(createMeal, cancellationToken);
             

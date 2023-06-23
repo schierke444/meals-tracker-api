@@ -1,9 +1,11 @@
 using BuildingBlocks.Commons.Interfaces;
+using BuildingBlocks.Commons.Models;
 using BuildingBlocks.EFCore;
 using Meals.Commons.Interfaces;
 using Meals.Entities;
 using Meals.Features.Meals.Dtos;
 using Meals.Persistence;
+using Dapper;
 
 namespace Meals.Repositories;
 
@@ -31,33 +33,81 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
         return results;
     }
 
-    public async Task<IEnumerable<MealsDto>> GetAllMealsByOwnerId(string OwnerId, int page = 1, int pageSize =10)
+    public async Task<PaginatedResults<MealDetailsDto>> GetPagedMealsListByOwnerId(
+        string OwnerId, 
+        string? search,
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1, 
+        int pageSize =10)
     {
-        var sql = @"SELECT m.Id, m.Meal_Name MealName, m.Meal_Review MealReview, m.Rating, m.Created_At CreatedAt, u.Id, u.Username
+        var sql = @"SELECT m.Id, m.Meal_Name MealName, m.Meal_Review MealReview, m.Rating, m.Created_At CreatedAt, c.Id, c.Name Category, u.Id, u.Username
                     FROM Meals m
                     INNER JOIN Users u ON u.Id = m.Owner_Id
-                    WHERE Owner_Id::text = @OwnerId 
-                    ORDER BY CreatedAt DESC " + 
-                    $"LIMIT {pageSize} OFFSET {pageSize * (page - 1)}";
+                    INNER JOIN Category c ON c.Id = m.Category_Id
+                    WHERE Owner_Id::text = @OwnerId";
 
-        var results = await _readDbContext.QueryMapAsync<MealsDto, UserDetailsDto, MealsDto>(
+        var totalItemsSql = "SELECT COUNT(id) FROM Meals WHERE Owner_Id::text = @OwnerId";
+
+        if(!string.IsNullOrEmpty(search)) 
+        {
+            var where = $" AND meal_name LIKE '%{search}%' ";
+            sql += where;
+            totalItemsSql += where;
+        }
+
+        sql += sortOrder == "desc" ? $" ORDER BY {GetMealsColumn(sortColumn)} DESC" : $" ORDER BY {GetMealsColumn(sortColumn)}";
+
+        var totalItems = await _readDbContext.ExecuteScalarAsync<int>(totalItemsSql, param: new {OwnerId});
+        var pageData = new PageMetadata(page, pageSize, totalItems);
+        
+        sql += $" LIMIT {pageSize}";
+        sql += $" OFFSET {pageSize * (page - 1)}";
+
+        var results = await _readDbContext._pgConnection.QueryAsync<MealDetailsDto, CategoryDetailsDto, UserDetailsDto, MealDetailsDto>(
             sql, 
-            (meals, users) => {
+            (meals, category, users) => {
+                meals.Category = category;
                 meals.Owner = users;
                 return meals;
             },
             new { OwnerId },
             splitOn: "Id");
 
-        return results;
+        PaginatedResults<MealDetailsDto> paginated = new(results, pageData);
+
+        return paginated;
     }
 
-    public async Task<int> GetMealsCountByOwnerId(string OwnerId)
+    public async Task<int> GetMealsCountByOwnerId(string OwnerId, string? query = null)
     {
-        var sql = "SELECT COUNT(*) FROM Meals WHERE Owner_Id::text = @OwnerId";
+        var sql = "SELECT COUNT(id) FROM Meals WHERE Owner_Id::text = @OwnerId";
 
         var results = await _readDbContext.ExecuteScalarAsync<int>(sql, new {OwnerId });
 
         return results;
+    }
+    private static string GetMealsColumn(string? sortColumn)
+    {
+        var s = sortColumn?.ToLower() switch {
+            "meal_name" => $"MealName",
+            "created_at" => $"CreatedAt",
+            "updated_at" => $"UpdatedAt",
+            _ => $"m.Id"
+        };
+
+        return s;
+    }
+
+    private static string GetMealIngredientColumn(string? sortColumn)
+    {
+        var s = sortColumn?.ToLower() switch {
+            "name" => $"name",
+            "created_at" => $"CreatedAt",
+            "updated_at" => $"UpdatedAt",
+            _ => $"m.Id"
+        };
+
+        return s;
     }
 }
