@@ -1,9 +1,11 @@
 ﻿using BuildingBlocks.Commons.Interfaces;
 using BuildingBlocks.Commons.Models;
 using BuildingBlocks.EFCore;
+using Dapper;
 using Meals.Entities;
 using Meals.Features.Ingredients.Dtos;
 using Meals.Features.Ingredients.Interfaces;
+using Meals.Features.Meals.Dtos;
 using Meals.Persistence;
 
 namespace Meals.Features.Ingredients.Repositories;
@@ -61,6 +63,45 @@ public sealed class IngredientsRepository : RepositoryBase<Ingredient>, IIngredi
         return results;
     }
 
+    public async Task<PaginatedResults<IngredientsDto>> GetPagedMealsIngredientsByMealId(
+        string MealId, 
+        string? search, 
+        string? sortColumn, 
+        string? sortOrder, 
+        int page = 1, 
+        int pageSize = 10)
+    {
+        var sql = @"SELECT i.id, i.name FROM meal_ingredients mi
+                    INNER JOIN Ingredients i ON mi.ingredient_id = i.id
+                    WHERE mi.meal_id::text = @MealId"; 
+
+        var totalItemsSql = @"SELECT COUNT(mi.id) 
+                            FROM meal_ingredients mi
+                            INNER JOIN Ingredients i ON mi.ingredient_id = i.id
+                            WHERE mi.meal_id::text = @MealId";
+
+        if(!string.IsNullOrEmpty(search)) 
+        {
+            var where = $" AND i.name LIKE '%{search}%' ";
+            sql += where;
+            totalItemsSql += where;
+        }
+
+        sql += sortOrder == "desc" ? $" ORDER BY {GetColumn(sortColumn)} DESC" : $" ORDER BY {GetColumn(sortColumn)}";
+
+        var totalItems = await _readDbContext.ExecuteScalarAsync<int>(totalItemsSql, param: new {MealId});
+        var pageData = new PageMetadata(page, pageSize, totalItems);
+        
+        sql += $" LIMIT {pageSize}";
+        sql += $" OFFSET {pageSize * (page - 1)}";
+
+        var results = await _readDbContext.QueryAsync<IngredientsDto>(sql, new {MealId});
+
+        PaginatedResults<IngredientsDto> paginated = new(results, pageData);
+
+        return paginated;
+    }
+
     public bool VerifyIngredientsByIds(IEnumerable<Guid> IngredientIds)
     {
         // check if there's a duplicate in the ingredient ids
@@ -78,10 +119,10 @@ public sealed class IngredientsRepository : RepositoryBase<Ingredient>, IIngredi
 
         return result;
     }
+
     private static string GetColumn(string? sortColumn)
     {
         var s = sortColumn?.ToLower() switch {
-            "content" => "content",
             "name" => "name",
             "created_at" => "created_at",
             "updated_at" => "updated_at",
@@ -90,5 +131,4 @@ public sealed class IngredientsRepository : RepositoryBase<Ingredient>, IIngredi
 
         return s;
     }
-
 }

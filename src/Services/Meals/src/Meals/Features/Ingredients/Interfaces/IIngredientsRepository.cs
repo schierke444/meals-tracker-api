@@ -14,6 +14,15 @@ public interface IIngredientsRepository : IReadRepository<Ingredient>, IWriteRep
         int page = 1,
         int pageSize = 10
     );
+
+    Task<PaginatedResults<IngredientsDto>> GetPagedMealsIngredientsByMealId(
+        string MealId, 
+        string? search,  
+        string? sortColumn,
+        string? sortOrder,
+        int page = 1, 
+        int pageSize =10);
+
     Task<IngredientDetailsDto> GetIngredientById(string ingredientId);
     bool VerifyIngredientsByIds(IEnumerable<Guid> IngredientIds); 
 }
