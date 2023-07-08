@@ -4,7 +4,8 @@ using Auth.Services;
 using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Services;
 
-namespace Auth.Features.Commands.LoginUser;
+namespace Auth.Features.Commands.LoginUser.v1;
+
 sealed class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, (AuthDetailsDto, string)>
 {
     private readonly IAuthRepository _authRepository;
@@ -21,7 +22,7 @@ sealed class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, (AuthDe
     {
         var results = await _authRepository.GetUserByUsername(request.Username);
 
-        if (results is null || !_passwordService.VerifyPassword(results.Password, request.Password))
+        if (results is null || !_passwordService.VerifyPassword(results.Password, request.Password, results.Salt))
             throw new UnauthorizedAccessException("Invalid Username or Password");
 
         AuthDetailsDto authDetails = new(results.Id, results.Username, _jwtService.GenerateJwt(results.Id, false));

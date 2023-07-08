@@ -16,7 +16,9 @@ public class AuthRepository : RepositoryBase<User>, IAuthRepository
 
     public async Task<UserDetailsDto?> GetUserByUsername(string username)
     {
-        var sql = "SELECT Id, Username, Password From Users WHERE Username = @Username";
+        var sql = @"SELECT u.id, username, password, salt, name Role FROM users u
+                    INNER JOIN roles r ON r.id = u.role_id 
+                    WHERE username = @Username";
         var result = await _readDbContext.QueryFirstOrDefaultAsync<UserDetailsDto>(sql, new { Username = username});
 
         return result;
@@ -24,7 +26,9 @@ public class AuthRepository : RepositoryBase<User>, IAuthRepository
 
     public async Task<UserDetailsDto?> GetUserById(string UserId)
     {
-        var sql = "SELECT Id, Username, Password From Users WHERE Id::text = @Id";
+        var sql = @"SELECT u.id, username, password, salt, name Role FROM users u
+                    INNER JOIN roles r ON r.id = u.role_id 
+                    WHERE u.id::text = @Id";
         var result = await _readDbContext.QueryFirstOrDefaultAsync<UserDetailsDto>(sql, new { Id = UserId});
 
         return result;

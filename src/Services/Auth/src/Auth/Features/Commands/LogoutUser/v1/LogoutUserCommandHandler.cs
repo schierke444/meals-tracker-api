@@ -3,7 +3,8 @@ using BuildingBlocks.Commons.CQRS;
 using BuildingBlocks.Services;
 using MediatR;
 
-namespace Auth.Features.Commands.LogoutUser;
+namespace Auth.Features.Commands.LogoutUser.v1;
+
 sealed class LogoutUserCommandHandler : ICommandHandler<LogoutUserCommand, Unit>
 {
     private readonly ICurrentUserService _currentUserService;

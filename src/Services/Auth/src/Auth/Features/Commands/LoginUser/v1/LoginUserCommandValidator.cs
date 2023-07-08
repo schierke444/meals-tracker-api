@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 
-namespace Auth.Features.Commands.LoginUser;
+namespace Auth.Features.Commands.LoginUser.v1;
+
 public sealed class LoginUserCommandValidator : AbstractValidator<LoginUserCommand> 
 {
     public LoginUserCommandValidator()

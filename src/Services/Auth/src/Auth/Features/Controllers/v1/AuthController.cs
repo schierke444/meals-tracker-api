@@ -1,17 +1,20 @@
-﻿using Auth.Commons.Dtos;
-using Auth.Features.Commands.LoginUser;
-using Auth.Features.Commands.LogoutUser;
-using Auth.Features.Commands.RegisterUser;
+﻿using Asp.Versioning;
+using Auth.Commons.Dtos;
+using Auth.Features.Commands.LoginUser.v1;
+using Auth.Features.Commands.LogoutUser.v1;
+using Auth.Features.Commands.RegisterUser.v1;
 using Auth.Features.Queries.RefreshUserToken;
 using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Web;
+using MassTransit;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Auth.Features.Controllers;
+namespace Auth.Features.Controllers.v1;
 
-[Route("[controller]/v1")]
+[ApiVersion("1.0")]
 public class AuthController : BaseController
 {
     public AuthController(IMediator mediator) : base(mediator)
@@ -28,19 +31,19 @@ public class AuthController : BaseController
             Response.Cookies.Append("rt", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                MaxAge = TimeSpan.FromDays(7)
+                MaxAge = TimeSpan.FromDays(7),
+                SameSite = SameSiteMode.Strict
             });
             return Ok(authDetails); 
             
         }
         catch(Exception ex)
         {
-            if(ex is ValidationException validation)
-                return BadRequest(new {errors = validation.Errors});
-            if(ex is UnauthorizedAccessException unauthorized)
-                return Unauthorized(new {message = unauthorized.Message});
-            return StatusCode(StatusCodes.Status500InternalServerError,
-            new { message = ex.Message,});
+            return ex switch {
+                ValidationException validation => BadRequest(new {message = validation.Message}),
+                UnauthorizedAccessException unauthorized => BadRequest(new {message = unauthorized.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message})
+            };
         }
     }
 
@@ -54,19 +57,19 @@ public class AuthController : BaseController
             Response.Cookies.Append("rt", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                MaxAge = TimeSpan.FromDays(7)
+                MaxAge = TimeSpan.FromDays(7),
+                SameSite = SameSiteMode.Strict
             });
 
             return Ok(authDetails); 
         }
         catch (Exception ex)
         {
-            if(ex is ValidationException validation)
-                return BadRequest(new {errors = validation.Errors});
-            if(ex is ConflictException conflict)
-                return BadRequest(new {message = conflict.Message});
-            return StatusCode(StatusCodes.Status500InternalServerError,
-            new { message = ex.Message,});
+            return ex switch {
+                ValidationException validation => BadRequest(new {message = validation.Message}),
+                RequestFaultException requestFault => BadRequest(new {message = requestFault.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message})
+            };
         }
     }
 
@@ -88,20 +91,22 @@ public class AuthController : BaseController
             Response.Cookies.Append("rt", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                MaxAge = TimeSpan.FromDays(7)
+                MaxAge = TimeSpan.FromDays(7),
+                SameSite = SameSiteMode.Strict 
             });
 
             return Ok(authDetails);
         }
         catch (Exception ex)
         {
-            if(ex is UnauthorizedAccessException unauthorized)
-                return BadRequest(new {message = unauthorized.Message});
-            return StatusCode(StatusCodes.Status500InternalServerError,
-            new { message = ex.Message,});
+            return ex switch {
+                UnauthorizedAccessException unauthorized => BadRequest(new {message = unauthorized.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message})
+            };
         }
     }
-
+    
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutUser(CancellationToken cancellationToken)
     {
@@ -112,16 +117,17 @@ public class AuthController : BaseController
             Response.Cookies.Delete("rt", new CookieOptions
             {
                 HttpOnly = true,
-                MaxAge = TimeSpan.Zero
+                MaxAge = TimeSpan.Zero,
+                SameSite = SameSiteMode.Strict
             });
             return Ok(); 
         }
         catch(Exception ex)
         {
-            if(ex is UnauthorizedAccessException unauthorized)
-                return Unauthorized(new {message = unauthorized.Message});
-            return StatusCode(StatusCodes.Status500InternalServerError,
-            new { message = ex.Message,});
+            return ex switch {
+                UnauthorizedAccessException unauthorized => BadRequest(new {message = unauthorized.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new {message = ex.Message})
+            };
         }
     }
 }

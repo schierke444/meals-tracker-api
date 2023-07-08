@@ -1,3 +1,3 @@
 ﻿namespace Auth.Commons.Dtos;
 
-public sealed record UserDetailsDto(Guid Id, string Username, string Password);
+public sealed record UserDetailsDto(Guid Id, string Username, string Password, string Salt, string Role);

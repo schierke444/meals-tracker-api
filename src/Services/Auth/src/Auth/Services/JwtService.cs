@@ -30,7 +30,7 @@ public sealed class JwtService : IJwtService
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, Id.ToString())        };
+            new Claim(JwtRegisteredClaimNames.Jti, Id.ToString())        };
 
         var tokenToWrite = new JwtSecurityToken
             (
@@ -61,17 +61,16 @@ public sealed class JwtService : IJwtService
             },
             out SecurityToken validatedToken 
         );
-
-        if(validatedToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase) ||
-            decoded.Identity == null ||
-            decoded.Identity.Name == null)
+        var jti = decoded.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        if (validatedToken is not JwtSecurityToken jwtSecurityToken ||
+           !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase) ||
+            jti is null)
         {
             userId = string.Empty;
             return false;
         }
 
-        userId = decoded.Identity.Name;
+        userId = jti; 
         return true;
     }
 }
