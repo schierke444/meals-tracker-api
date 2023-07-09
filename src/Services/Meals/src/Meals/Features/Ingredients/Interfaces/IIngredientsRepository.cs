@@ -2,12 +2,13 @@
 using BuildingBlocks.Commons.Models;
 using Meals.Entities;
 using Meals.Features.Ingredients.Dtos;
+using Meals.Features.Meals.Dtos;
 
 namespace Meals.Features.Ingredients.Interfaces;
 
 public interface IIngredientsRepository : IReadRepository<Ingredient>, IWriteRepository<Ingredient>
 {
-    Task<PaginatedResults<IngredientDetailsDto>> GetPagedIngredientList(
+    Task<PaginatedResults<IngredientsDto>> GetPagedIngredientList(
         string? search,
         string? sortColumn,
         string? sortOrder,
@@ -23,6 +24,5 @@ public interface IIngredientsRepository : IReadRepository<Ingredient>, IWriteRep
         int page = 1, 
         int pageSize =10);
 
-    Task<IngredientDetailsDto> GetIngredientById(string ingredientId);
-    bool VerifyIngredientsByIds(IEnumerable<Guid> IngredientIds); 
+    bool VerifyIngredientsByIds(IEnumerable<AddIngredientsToMealsDto> IngredientIds); 
 }

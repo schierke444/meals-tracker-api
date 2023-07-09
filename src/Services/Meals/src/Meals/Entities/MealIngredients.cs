@@ -12,4 +12,5 @@ public class MealIngredients : BaseEntity
     [Column("meal_id")]
     public Guid MealId { get; set; }
     public Meal? Meals { get; set; }
+    public int Amount { get; set; }
 }

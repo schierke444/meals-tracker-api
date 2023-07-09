@@ -6,8 +6,13 @@ using BuildingBlocks.Jwt;
 using BuildingBlocks.Services;
 using FluentValidation;
 using Meals.Commons.Interfaces;
+using Meals.Features.Category;
+using Meals.Features.Category.Repositories;
 using Meals.Features.Ingredients.Interfaces;
 using Meals.Features.Ingredients.Repositories;
+using Meals.Features.Meals.Interfaces;
+using Meals.Features.Meals.Repositories;
+using Meals.Features.Meals.Services;
 using Meals.Persistence;
 using Meals.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -26,8 +31,14 @@ public static class Infrastructure
         services.AddScoped<IMealsRepository, MealsRepository>();
         services.AddScoped<IIngredientsRepository, IngredientsRepository>();
         services.AddScoped<IMealIngredientsRepository, MealIngredientsRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IMealCategoryRepository, MealCategoryRepository>();
+        services.AddTransient<MealCategoryService>();
+        services.AddTransient<MealIngredientsService>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddApiVersionExtension();
         services.AddCustomMediatR();
+        services.AddMassTransitExtension(config);
 
         return services;
     }

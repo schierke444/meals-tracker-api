@@ -12,9 +12,12 @@ public class Meal : BaseEntity
     public string? MealReview { get; set; }
     [Column("rating")]
     public int Rating { get; set; }
+    [Column("instructions")]
+    public required string Instructions { get; set; }
     [Column("owner_id")]
     public Guid OwnerId { get; set; }
-    [Column("category_id")]
-    public Guid CategoryId { get; set; }
+    [Column("owner_name")]
+    public required string OwnerName { get; set; }
+    public ICollection<MealCategory> MealCategories {get; set; } = new List<MealCategory>();
     public ICollection<MealIngredients> MealIngredient { get; set; } = new List<MealIngredients>();
 }

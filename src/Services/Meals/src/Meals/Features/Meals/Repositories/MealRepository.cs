@@ -6,14 +6,19 @@ using Meals.Entities;
 using Meals.Features.Meals.Dtos;
 using Meals.Persistence;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Meals.Features.Ingredients.Dtos;
+using Category.Features.Dtos;
 
 namespace Meals.Repositories;
 
 public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
 {
     private readonly IPgsqlDbContext _readDbContext;
+    private readonly MealsDbContext _mealContext;
     public MealsRepository(MealsDbContext context, IPgsqlDbContext readDbContext) : base(context)
     {
+       _mealContext = context; 
         _readDbContext = readDbContext;
     }
 
@@ -25,15 +30,29 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
         return results;
     }
 
-    public async Task<MealDetailsDto> GetMealsById(string MealId)
+    public async Task<object?> GetMealsById(string MealId)
     {
-        var sql = "SELECT * FROM Meals WHERE Id::text = @Id";
-        var results = await _readDbContext.QueryFirstOrDefaultAsync<MealDetailsDto>(sql, new {Id = MealId});
-
-        return results;
+        return await _mealContext.Meals
+            .AsNoTracking()
+            .Include(x => x.MealCategories)
+            .ThenInclude(x => x.Category)
+            .Include(x => x.MealIngredient)
+            .ThenInclude(x => x.Ingredients)
+            .Where(x => x.Id.ToString() == MealId)
+            .Select(x => new MealDetailsDto(
+                x.Id,
+                x.MealName,
+                x.MealReview,
+                x.Rating,
+                x.Instructions,
+                x.MealIngredient.Select(x => new IngredientsWithAmountDto(x.IngredientId, x.Ingredients!.Name, x.Amount)),
+                x.MealCategories.Select(x => new CategoryDto(x.CategoryId, x.Category!.Name)),
+                new UserDetailsDto(x.OwnerId, x.OwnerName),
+                x.CreatedAt
+            )).FirstOrDefaultAsync();        
     }
 
-    public async Task<PaginatedResults<MealDetailsDto>> GetPagedMealsListByOwnerId(
+    public async Task<PaginatedResults<MealsDto>> GetPagedMealsListByOwnerId(
         string OwnerId, 
         string? search,
         string? sortColumn,
@@ -41,10 +60,8 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
         int page = 1, 
         int pageSize =10)
     {
-        var sql = @"SELECT m.Id, m.Meal_Name MealName, m.Meal_Review MealReview, m.Rating, m.Created_At CreatedAt, c.Id, c.Name Category, u.Id, u.Username
+        var sql = @"SELECT m.Id, m.Meal_Name MealName, m.Rating, m.Created_At CreatedAt
                     FROM Meals m
-                    INNER JOIN Users u ON u.Id = m.Owner_Id
-                    INNER JOIN Category c ON c.Id = m.Category_Id
                     WHERE Owner_Id::text = @OwnerId";
 
         var totalItemsSql = "SELECT COUNT(id) FROM Meals WHERE Owner_Id::text = @OwnerId";
@@ -64,17 +81,9 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
         sql += $" LIMIT {pageSize}";
         sql += $" OFFSET {pageSize * (page - 1)}";
 
-        var results = await _readDbContext._pgConnection.QueryAsync<MealDetailsDto, CategoryDetailsDto, UserDetailsDto, MealDetailsDto>(
-            sql, 
-            (meals, category, users) => {
-                meals.Category = category;
-                meals.Owner = users;
-                return meals;
-            },
-            new { OwnerId },
-            splitOn: "Id");
+        var results = await _readDbContext._pgConnection.QueryAsync<MealsDto>(sql, param: new {OwnerId});
 
-        PaginatedResults<MealDetailsDto> paginated = new(results, pageData);
+        PaginatedResults<MealsDto> paginated = new(results, pageData);
 
         return paginated;
     }
