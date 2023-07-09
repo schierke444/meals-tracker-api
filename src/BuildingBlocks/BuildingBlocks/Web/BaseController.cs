@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Web;
 
@@ -9,7 +9,7 @@ namespace BuildingBlocks.Web;
 [ApiVersion("1.0")]
 public abstract class BaseController : ControllerBase
 {
-    protected const string BaseApiPath = "api/v{version:apiVersion}";
+    protected const string BaseApiPath = "[controller]";
     protected readonly IMediator mediator;
     public BaseController(IMediator mediator)
     {
