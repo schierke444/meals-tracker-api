@@ -36,8 +36,8 @@ sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, (
             request.LastName
         ), cancellationToken);
 
-        AuthDetailsDto authDetails = new(result.Message.Id, result.Message.Username, _jwtService.GenerateJwt(result.Message.Id, false));
-        string refreshToken = _jwtService.GenerateJwt(result.Message.Id, true);
+        AuthDetailsDto authDetails = new(result.Message.Id, result.Message.Username, _jwtService.GenerateJwt(result.Message.Id, result.Message.Role, false));
+        string refreshToken = _jwtService.GenerateJwt(result.Message.Id, result.Message.Role, true);
 
         return (authDetails, refreshToken); 
     }

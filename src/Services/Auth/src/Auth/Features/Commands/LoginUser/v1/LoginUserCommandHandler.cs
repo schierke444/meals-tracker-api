@@ -25,8 +25,8 @@ sealed class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, (AuthDe
         if (results is null || !_passwordService.VerifyPassword(results.Password, request.Password, results.Salt))
             throw new UnauthorizedAccessException("Invalid Username or Password");
 
-        AuthDetailsDto authDetails = new(results.Id, results.Username, _jwtService.GenerateJwt(results.Id, false));
-        string refreshToken = _jwtService.GenerateJwt(results.Id, true);
+        AuthDetailsDto authDetails = new(results.Id, results.Username, _jwtService.GenerateJwt(results.Id, results.Role, false));
+        string refreshToken = _jwtService.GenerateJwt(results.Id, results.Role, true);
 
         return (authDetails, refreshToken);
     }

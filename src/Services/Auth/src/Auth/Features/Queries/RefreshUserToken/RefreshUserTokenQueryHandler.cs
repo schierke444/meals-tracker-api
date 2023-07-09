@@ -23,8 +23,8 @@ sealed class RefreshUserTokenQueryHandler : IRequestHandler<RefreshUserTokenQuer
         var user = await _authRepository.GetUserById(userId)
             ?? throw new UnauthorizedAccessException("User was not found.");
 
-        AuthDetailsDto authDetails = new(user.Id, user.Username, _jwtService.GenerateJwt(user.Id, false));
-        string refreshToken = _jwtService.GenerateJwt(user.Id, true);
+        AuthDetailsDto authDetails = new(user.Id, user.Username, _jwtService.GenerateJwt(user.Id, user.Role, false));
+        string refreshToken = _jwtService.GenerateJwt(user.Id, user.Role, true);
 
         return (authDetails, refreshToken);
     }
