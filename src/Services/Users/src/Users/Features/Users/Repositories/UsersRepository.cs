@@ -1,12 +1,13 @@
 using BuildingBlocks.EFCore;
-using Users.API.Entities;
-using Users.API.Persistence;
+using Users.Entities;
+using Users.Features.Users.Interfaces;
+using Users.Persistence;
 
-namespace Users.API.Repositories;
+namespace Users.Features.Users.Repositories;
 
 public class UsersRepository : RepositoryBase<User>, IUsersRepository
 {
     public UsersRepository(ApplicationDbContext context) : base(context)
     {
-    }
+    } 
 }

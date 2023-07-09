@@ -1,8 +1,7 @@
 using BuildingBlocks.Commons.Exceptions;
-using BuildingBlocks.Events;
+using BuildingBlocks.Events.Users;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
-using Users.API.Repositories;
+using Users.Features.Users.Interfaces;
 
 namespace Users.API.RequestConsumers;
 
@@ -17,7 +16,7 @@ public class GetUserByIdConsumer : IConsumer<GetUserByIdRecord>
     {
         var result = await _usersRepository.GetValue(
             x => x.Id.ToString() == context.Message.UserId,
-            x => new GetUserByIdResult { Id = x.Id, Username = x.Username, Email = x.Email}
+            x => new GetUserByIdResult(x.Id, x.Username)
         )
             ?? throw new NotFoundException($"User with Id '{context.Message.UserId}' was not found.");
 
