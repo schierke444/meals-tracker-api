@@ -28,7 +28,7 @@ public abstract class RepositoryBase<T> : IReadRepository<T>, IWriteRepository<T
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task AddRange(ICollection<T> entities, CancellationToken cancellationToken = default)
+    public async Task AddRange(IEnumerable<T> entities, CancellationToken cancellationToken = default)
     {
         await _context.Set<T>().AddRangeAsync(entities, cancellationToken);
     }
@@ -85,5 +85,10 @@ public abstract class RepositoryBase<T> : IReadRepository<T>, IWriteRepository<T
             query = includes.Aggregate(query, (context, include) => context.Include(include));
 
         return await query.Where(expression).ToListAsync();
+    }
+
+    public void DeleteRange(IEnumerable<T> entities)
+    {
+        _context.Set<T>().RemoveRange(entities);
     }
 }

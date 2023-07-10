@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace BuildingBlocks.Services;
@@ -15,5 +16,5 @@ public class CurrentUserService : ICurrentUserService
     {
         _httpContext = httpContext;
     }
-    public string? UserId => _httpContext?.HttpContext?.User.FindFirstValue(ClaimTypes.Name);
+    public string? UserId => _httpContext?.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Jti);
 }

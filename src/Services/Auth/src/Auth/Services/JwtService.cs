@@ -9,7 +9,7 @@ namespace Auth.Services;
 
 public interface IJwtService
 {
-    string GenerateJwt(Guid Id, bool isRefreshToken);
+    string GenerateJwt(Guid Id, string Role, bool isRefreshToken);
 
     bool VerifyRefreshToken(string RefreshToken, out string userId);
 }
@@ -21,7 +21,7 @@ public sealed class JwtService : IJwtService
     {
         _config = config;
     }
-    public string GenerateJwt(Guid Id, bool isRefreshToken)
+    public string GenerateJwt(Guid Id, string Role, bool isRefreshToken)
     {
         var securityKey = new SymmetricSecurityKey
              (Encoding.UTF8.GetBytes(_config["Authentication:SecretForKey"]!));
@@ -30,7 +30,9 @@ public sealed class JwtService : IJwtService
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, Id.ToString())        };
+            new Claim(JwtRegisteredClaimNames.Jti, Id.ToString()),
+            new Claim(ClaimTypes.Role, Role)
+        };
 
         var tokenToWrite = new JwtSecurityToken
             (
@@ -61,17 +63,16 @@ public sealed class JwtService : IJwtService
             },
             out SecurityToken validatedToken 
         );
-
-        if(validatedToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase) ||
-            decoded.Identity == null ||
-            decoded.Identity.Name == null)
+        var jti = decoded.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        if (validatedToken is not JwtSecurityToken jwtSecurityToken ||
+           !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase) ||
+            jti is null)
         {
             userId = string.Empty;
             return false;
         }
 
-        userId = decoded.Identity.Name;
+        userId = jti; 
         return true;
     }
 }

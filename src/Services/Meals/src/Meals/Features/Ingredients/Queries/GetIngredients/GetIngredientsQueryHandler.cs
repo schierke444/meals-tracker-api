@@ -5,7 +5,7 @@ using Meals.Features.Ingredients.Interfaces;
 
 namespace Meals.Features.Ingredients.Queries.GetIngredients;
 
-sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, PaginatedResults<IngredientDetailsDto>>
+sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, PaginatedResults<IngredientsDto>>
 {
     private readonly IIngredientsRepository _ingredientsRepository;
 
@@ -14,7 +14,7 @@ sealed class GetIngredientsQueryHandler : IQueryHandler<GetIngredientsQuery, Pag
         _ingredientsRepository = ingredientsRepository;
     }
 
-    public async Task<PaginatedResults<IngredientDetailsDto>> Handle(GetIngredientsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResults<IngredientsDto>> Handle(GetIngredientsQuery request, CancellationToken cancellationToken)
     {
         var results = await _ingredientsRepository.GetPagedIngredientList(
             request.Search,

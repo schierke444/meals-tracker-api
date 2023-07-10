@@ -10,4 +10,4 @@ public record GetIngredientsQuery(
     string? SortOrder,
     int Page = 1,
     int PageSize = 10
-) : IQuery<PaginatedResults<IngredientDetailsDto>>;
+) : IQuery<PaginatedResults<IngredientsDto>>;

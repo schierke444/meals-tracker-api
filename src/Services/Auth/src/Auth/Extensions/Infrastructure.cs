@@ -24,7 +24,9 @@ public static class Infrastructure
         services.AddScoped<IPgsqlDbContext, PgsqlDbContext>();
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddApiVersionExtension();
         services.AddCustomMediatR();
+        services.AddMassTransitExtension(config);
 
 
         return services;

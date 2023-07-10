@@ -1,13 +1,5 @@
-using Auth.Persistence.Seeds;
-using BuildingBlocks.Events;
-using BuildingBlocks.Jwt;
-using BuildingBlocks.Services;
-using BuildingBlocks.Web;
-using MassTransit;
 using Serilog;
-using Users.API.Persistence;
-using Users.API.Repositories;
-using Users.API.RequestConsumers;
+using Users.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,47 +11,17 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>();
-builder.Services.AddScoped<IUsersRepository, UsersRepository>();
-builder.Services.AddJwtExtensions(builder.Configuration);
-builder.Services.AddScoped<IPasswordService, PasswordService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-builder.Services.AddMassTransit(cfg =>
-{
-    cfg.SetKebabCaseEndpointNameFormatter();
-    cfg.AddConsumer<GetUserByIdConsumer>();
-
-    cfg.AddRequestClient<GetUserByIdRecord>(new Uri("exchange:getuser-queue"));
-
-    // Specifying the Event to be consume
-    cfg.UsingRabbitMq((ctx, cfg) =>
-    {
-        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
-        cfg.ReceiveEndpoint("getuser-queue", (c) =>
-        {
-            c.ConfigureConsumer<GetUserByIdConsumer>(ctx);
-        });
-    });
-});
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg.ReadFrom.Configuration(ctx.Configuration));
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-// Manually Seed Data thru CLI using "seed:user_data"
-if (args.Length > 0)
-{
-    var seed = args.Any(x => x == "seed:user_data");
-    if (seed)
-        app.SeedData(builder.Configuration, new PasswordService(builder.Configuration));
 }
 
 app.UseSerilogRequestLogging();

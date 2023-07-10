@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using BuildingBlocks.Commons.Models;
 
 namespace Auth.Entities;
@@ -10,6 +10,6 @@ public class User : BaseEntity
     public required string Username { get; set; }
     [Column("password")]
     public required string Password { get; set; }
-    [Column("email")]
-    public required string Email { get; set; }
+    [Column("salt")]
+    public required string Salt { get; set; }
 }
