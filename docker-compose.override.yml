@@ -44,24 +44,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
     ports:
-      - "8001:80"
-
-  category.api:
-     depends_on:
-       - appdb
-       - rabbitmq
-     container_name: category.api
-     environment:
-       - ASPNETCORE_ENVIRONMENT=Development
-       - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-       - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
-     ports:
-       - "8002:80"
-     volumes:
-       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
+      - "8001:3001"
 
   meals.api:
     container_name: meals.api
@@ -71,25 +56,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
     ports:
-      - "8003:80"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
-
-  users.api:
-    container_name: users.api
-    depends_on:
-      - appdb
-      - rabbitmq
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
-    ports:
-      - "8004:80"
+      - "8003:3003"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -102,9 +71,39 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
     ports:
-      - "8005:80"
+      - "8004:3004"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  users.api:
+    container_name: users.api
+    depends_on:
+      - appdb
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
+    ports:
+      - "8005:3005"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  follows.api:
+    container_name: follows.api
+    depends_on:
+      - appdb
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
+    ports:
+      - "8002:3002"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -125,13 +124,10 @@ services:
     container_name: nginx-gw 
     depends_on:
       - auth.api
-      - category.api
       - meals.api
       - posts.api
+      - users.api
     environment:
-      - NGINX_JWT_SECRET=${NGINX_JWT_SECRET}
-      - NGINX_JWT_AUD=${NGINX_JWT_AUD}
-      - NGINX_JWT_ISS=${NGINX_JWT_ISS}
       - NGINX_CLIENT_URL=${NGINX_CLIENT_URL}
     ports:
-      - "8011:80"
+      - "80:80"
