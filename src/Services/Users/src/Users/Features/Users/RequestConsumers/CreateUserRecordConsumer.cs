@@ -39,7 +39,9 @@ public class CreateUserRecordConsumer : IConsumer<CreateUserRecord>
         {
             Email = context.Message.Email,
             FirstName = context.Message.Username,
-            LastName = context.Message.LastName
+            LastName = context.Message.LastName,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         User newUser = new()
