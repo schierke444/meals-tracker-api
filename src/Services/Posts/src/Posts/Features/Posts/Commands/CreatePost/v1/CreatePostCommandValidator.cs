@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Posts.Features.Posts.Commands.CreatePost;
+namespace Posts.Features.Posts.Commands.CreatePost.v1;
 
 public sealed class CreatePostCommandValidator : AbstractValidator<CreatePostCommand>
 {

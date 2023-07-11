@@ -10,4 +10,5 @@ public sealed class Post : BaseEntity
     public required string Content { get; set; }
     [Column("owner_id")]
     public Guid OwnerId { get; set; }
+    public UsersPosts? UsersPosts { get; set; }
 }

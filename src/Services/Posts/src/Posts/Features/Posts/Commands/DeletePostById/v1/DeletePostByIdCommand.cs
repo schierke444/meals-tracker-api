@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Posts.Features.Posts.Commands.DeletePostById;
 
-public record DeletePostByIdCommand(string PostId, string OwnerId) : ICommand<Unit>;
+public record DeletePostByIdCommand(string PostId) : ICommand<Unit>;

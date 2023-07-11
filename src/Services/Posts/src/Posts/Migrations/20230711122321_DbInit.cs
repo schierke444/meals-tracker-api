@@ -6,11 +6,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Posts.Migrations
 {
     /// <inheritdoc />
-    public partial class AddPosts : Migration
+    public partial class DbInit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "users_posts",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    username = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_users_posts", x => x.user_id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "posts",
                 columns: table => new
@@ -24,7 +36,18 @@ namespace Posts.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_posts", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_posts_users_posts_owner_id",
+                        column: x => x.owner_id,
+                        principalTable: "users_posts",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_posts_owner_id",
+                table: "posts",
+                column: "owner_id");
         }
 
         /// <inheritdoc />
@@ -32,6 +55,9 @@ namespace Posts.Migrations
         {
             migrationBuilder.DropTable(
                 name: "posts");
+
+            migrationBuilder.DropTable(
+                name: "users_posts");
         }
     }
 }

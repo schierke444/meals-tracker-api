@@ -12,15 +12,15 @@ using Posts.Persistence;
 namespace Posts.Migrations
 {
     [DbContext(typeof(PostsDbContext))]
-    [Migration("20230610213501_AddPosts")]
-    partial class AddPosts
+    [Migration("20230711122321_DbInit")]
+    partial class DbInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -51,7 +51,42 @@ namespace Posts.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("posts");
+                });
+
+            modelBuilder.Entity("Posts.Entities.UsersPosts", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("users_posts");
+                });
+
+            modelBuilder.Entity("Posts.Entities.Post", b =>
+                {
+                    b.HasOne("Posts.Entities.UsersPosts", "UsersPosts")
+                        .WithMany("Posts")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UsersPosts");
+                });
+
+            modelBuilder.Entity("Posts.Entities.UsersPosts", b =>
+                {
+                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }

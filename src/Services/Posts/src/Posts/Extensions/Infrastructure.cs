@@ -22,8 +22,10 @@ public static class Infrastructure
         services.AddJwtExtensions(config);
         services.AddScoped<IPgsqlDbContext, PgsqlDbContext>();
         services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IUsersPostsRepository, UsersPostsRepository>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddCustomMediatR();
+        services.AddMassTransitExtension(config);
 
         return services;
     }
