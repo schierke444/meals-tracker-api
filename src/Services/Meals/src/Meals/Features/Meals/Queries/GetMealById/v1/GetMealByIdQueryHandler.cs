@@ -5,7 +5,7 @@ using Meals.Features.Meals.Dtos;
 
 namespace Meals.Features.Meals.Queries.GetMealById.v1;
 
-sealed class GetMealByIdQueryHandler : IQueryHandler<GetMealByIdQuery, object>
+sealed class GetMealByIdQueryHandler : IQueryHandler<GetMealByIdQuery, MealDetailsDto>
 {
     private readonly IMealsRepository _mealsRepository;
 
@@ -14,9 +14,9 @@ sealed class GetMealByIdQueryHandler : IQueryHandler<GetMealByIdQuery, object>
         _mealsRepository = mealsRepository;
     }
 
-    public async Task<object> Handle(GetMealByIdQuery request, CancellationToken cancellationToken)
+    public async Task<MealDetailsDto> Handle(GetMealByIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await _mealsRepository.GetMealsById(request.MealId)
+        var result = await _mealsRepository.GetMealsById(request.MealId, request.includeIngredients, request.includeCategory)
          ?? throw new NotFoundException($"Meal with Id '{request.MealId}' was not found.");
 
         return result;

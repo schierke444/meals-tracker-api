@@ -19,24 +19,47 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
         _readDbContext = readDbContext;
     }
 
-    public async Task<IEnumerable<PostsDto>> GetAllPosts()
+    public async Task<PaginatedResults<PostDetailsDto>> GetAllPosts(string? search, string? sortColumn, string? sortOrder, int page, int pageSize)
     {
-        var sql = "SELECT Id, Content FROM Posts";
-        var results = await _readDbContext.QueryAsync<PostsDto>(sql);
+        var sql = $@"SELECT p.Id, p.content, p.created_at CreatedAt, up.user_id Id, up.username OwnerName 
+                    FROM posts p
+                    INNER JOIN users_posts up ON up.user_id = p.owner_id";
 
-        return results;
+        var totalItemsSql = "SELECT COUNT(id) FROM posts";
+
+        if(!string.IsNullOrEmpty(search))
+            sql += $" WHERE LOWER(content) LIKE '%{search.ToLower()}%' OR LOWER(up.username) LIKE '%{search.ToLower()}%'";
+
+        sql += sortOrder == "desc" ? $" ORDER BY {GetColumn(sortColumn)} DESC" : $" ORDER BY {GetColumn(sortColumn)}";
+
+        var totalItems = await _readDbContext.ExecuteScalarAsync<int>(totalItemsSql);
+        var pageData = new PageMetadata(page, pageSize, totalItems);
+        
+        sql += $" LIMIT {pageSize}";
+        sql += $" OFFSET {pageSize * (page - 1)}";
+        
+        var results = await _readDbContext.QueryMapAsync<PostDetailsDto, UserDetailsDto, PostDetailsDto>(
+            sql,
+            map: (p, up) => {
+                p.Owner = up;
+                return p;
+            },
+            splitOn: "Id"
+        );
+
+        PaginatedResults<PostDetailsDto> paginated = new(results, pageData);
+
+        return paginated;
     }
-
     public async Task<PaginatedResults<PostDetailsDto>> GetPagedPostListByOwnerId(
         string OwnerId,
         string? sortColumn,
         string? sortOrder,
         int page = 1, int pageSize = 10)
     {
-        var sql = $@"
-                    SELECT p.Id, p.Content, p.created_at CreatedAt, p.updated_at UpdatedAt, u.Id, u.Username
-                    FROM Posts p
-                    INNER JOIN Users u ON u.Id = p.Owner_Id
+        var sql = $@"SELECT p.Id, p.content, p.created_at CreatedAt, up.user_id Id, up.username OwnerName
+                    FROM posts p
+                    INNER JOIN users_posts up ON up.user_id = p.owner_id
                     WHERE Owner_Id::text = @OwnerId 
                     ";
 
@@ -56,12 +79,12 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
         
         var results = await _readDbContext.QueryMapAsync<PostDetailsDto, UserDetailsDto, PostDetailsDto>(
             sql,
-            map: (posts, users) => {
-                posts.Owner = users;
-                return posts;
+            map: (p, up) => {
+                p.Owner = up;
+                return p;
             },
-            param: new {OwnerId},
-            splitOn: "Id"
+            splitOn: "Id",
+            param: new {OwnerId}
         );
 
         PaginatedResults<PostDetailsDto> paginated = new(results, pageData);
@@ -73,14 +96,6 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
     {
         var sql = "SELECT * FROM Posts WHERE Id::text = @Id";
         var results = await _readDbContext.QueryFirstOrDefaultAsync<PostDetailsDto>(sql, new {Id = PostId});
-
-        return results;
-    }
-
-    public async Task<PostDetailsDto> GetPostByIdAndOwnerId(string PostId, string OwnerId)
-    {
-        var sql = "SELECT Id, Content, created_at CreatedAt, updated_at UpdatedAt, owner_id OwnerId FROM Posts WHERE Id::text = @Id AND Owner_Id::text = @OwnerId";
-        var results = await _readDbContext.QueryFirstOrDefaultAsync<PostDetailsDto>(sql, new {Id = PostId, OwnerId = OwnerId});
 
         return results;
     }
@@ -97,11 +112,11 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
     {
         var s = sortColumn?.ToLower() switch {
             "content" => $"p.content",
-            "created_at" => $"p.created_at",
             "updated_at" => $"p.updated_at",
-            _ => $"p.Id"
+            _ => $"p.created_at",
         };
 
         return s;
-    } 
+    }
+
 }

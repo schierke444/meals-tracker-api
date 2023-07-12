@@ -43,19 +43,23 @@ services:
       context: .
       dockerfile: src/Services/Follows/src/Follows.API/Dockerfile
 
-
-
-  # webapigw:
-  #   image: ${DOCKER_REGISTRY-}webapigw
-  #   build:
-  #     context: .
-  #     dockerfile: src/ApiGateways/src/WebApiGw/Dockerfile
-
-  nginx-gw:
-    image: ${DOCKER_REGISTRY-}nginx-gw
+  admin.api-gw:
+    image: ${DOCKER_REGISTRY-}adminapigw
     build:
       context: .
-      dockerfile: src/ApiGateways/src/nginx/Dockerfile
+      dockerfile: src/ApiGateways/src/AdminApiGw/Dockerfile
+
+  web.api-gw:
+    image: ${DOCKER_REGISTRY-}webapigw
+    build:
+      context: .
+      dockerfile: src/ApiGateways/src/WebApiGw/Dockerfile
+
+  nginx:
+    image: ${DOCKER_REGISTRY-}nginx
+    build:
+      context: .
+      dockerfile: src/ApiGateways/src/proxy/Dockerfile
       
 volumes:
   appdb-data:

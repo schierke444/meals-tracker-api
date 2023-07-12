@@ -8,7 +8,7 @@ namespace Meals.Commons.Interfaces;
 public interface IMealsRepository : IReadRepository<Meal>, IWriteRepository<Meal>
 {
     Task<int> GetMealsCountByOwnerId(string OwnerId, string? query = null);
-    Task<object?> GetMealsById(string MealId);
+    Task<MealDetailsDto?> GetMealsById(string MealId, bool includeIngredients = true, bool includeCategory = true);
     Task<PaginatedResults<MealsDto>> GetPagedMealsListByOwnerId(
         string OwnerId, 
         string? search,  

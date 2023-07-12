@@ -22,6 +22,7 @@ public static class Infrastructure
         services.AddJwtExtensions(config);
         services.AddScoped<IPgsqlDbContext, PgsqlDbContext>();
         services.AddScoped<IFollowRepository, FollowRepository>();
+        services.AddScoped<IUsersFollowsRepository, UsersFollowsRepository>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddApiVersionExtension();
         services.AddCustomMediatR();

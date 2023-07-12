@@ -17,7 +17,7 @@ namespace Meals.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -72,6 +72,38 @@ namespace Meals.Migrations
                     b.ToTable("ingredients");
                 });
 
+            modelBuilder.Entity("Meals.Entities.LikedMeals", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("MealId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("meal_id");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("liked_meals");
+                });
+
             modelBuilder.Entity("Meals.Entities.Meal", b =>
                 {
                     b.Property<Guid>("Id")
@@ -101,11 +133,6 @@ namespace Meals.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
-                    b.Property<string>("OwnerName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("owner_name");
-
                     b.Property<int>("Rating")
                         .HasColumnType("integer")
                         .HasColumnName("rating");
@@ -115,6 +142,8 @@ namespace Meals.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("meals");
                 });
@@ -186,6 +215,53 @@ namespace Meals.Migrations
                     b.ToTable("meal_ingredients");
                 });
 
+            modelBuilder.Entity("Meals.Entities.UsersMeals", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("users_meals");
+                });
+
+            modelBuilder.Entity("Meals.Entities.LikedMeals", b =>
+                {
+                    b.HasOne("Meals.Entities.Meal", "Meal")
+                        .WithMany("Likes")
+                        .HasForeignKey("MealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Meals.Entities.UsersMeals", "UsersMeals")
+                        .WithMany("LikedMeals")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Meal");
+
+                    b.Navigation("UsersMeals");
+                });
+
+            modelBuilder.Entity("Meals.Entities.Meal", b =>
+                {
+                    b.HasOne("Meals.Entities.UsersMeals", "UsersMeals")
+                        .WithMany("Meals")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UsersMeals");
+                });
+
             modelBuilder.Entity("Meals.Entities.MealCategory", b =>
                 {
                     b.HasOne("Meals.Entities.Category", "Category")
@@ -236,9 +312,18 @@ namespace Meals.Migrations
 
             modelBuilder.Entity("Meals.Entities.Meal", b =>
                 {
+                    b.Navigation("Likes");
+
                     b.Navigation("MealCategories");
 
                     b.Navigation("MealIngredient");
+                });
+
+            modelBuilder.Entity("Meals.Entities.UsersMeals", b =>
+                {
+                    b.Navigation("LikedMeals");
+
+                    b.Navigation("Meals");
                 });
 #pragma warning restore 612, 618
         }

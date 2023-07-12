@@ -60,11 +60,15 @@ public class MealsController : BaseController
     }
 
     [HttpGet("{mealId}", Name = "GetMealById")]
-    public async Task<ActionResult<MealDetailsDto>> GetMealById(string mealId, CancellationToken cancellationToken)
+    public async Task<ActionResult<MealDetailsDto>> GetMealById(
+        string mealId, 
+        [FromQuery]bool includeIngredients = true,
+        [FromQuery]bool includeCategory = true,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new GetMealByIdQuery(mealId);
+            var request = new GetMealByIdQuery(mealId, includeIngredients, includeCategory);
 
             var result = await mediator.Send(request, cancellationToken);
 
@@ -72,7 +76,10 @@ public class MealsController : BaseController
         }
         catch(Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            return ex switch {
+                NotFoundException notFound => NotFound(new { message = notFound.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message })
+            }; 
         }
     }
 
