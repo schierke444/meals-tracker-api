@@ -5,20 +5,20 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["src/ApiGateways/src/WebApiGw/WebApiGw.csproj", "src/ApiGateways/src/WebApiGw/"]
+COPY ["src/ApiGateways/src/AdminApiGw/AdminApiGw.csproj", "src/ApiGateways/src/AdminApiGw/"]
 COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
-RUN dotnet restore "src/ApiGateways/src/WebApiGw/WebApiGw.csproj"
+RUN dotnet restore "src/ApiGateways/src/AdminApiGw/AdminApiGw.csproj"
 COPY . .
-WORKDIR "/src/src/ApiGateways/src/WebApiGw"
-RUN dotnet build "WebApiGw.csproj" -c Release -o /app/build
+WORKDIR "/src/src/ApiGateways/src/AdminApiGw"
+RUN dotnet build "AdminApiGw.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "WebApiGw.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AdminApiGw.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WebApiGw.dll"]
+ENTRYPOINT ["dotnet", "AdminApiGw.dll"]
 
-EXPOSE 4002
-ENV ASPNETCORE_URLS=http://*:4002
+EXPOSE 4001
+ENV ASPNETCORE_URLS=http://*:4001

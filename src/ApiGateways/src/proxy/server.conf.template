@@ -13,61 +13,8 @@ server {
 
 
 
-    location /Auth {
-        limit_req zone=mylimit;
-        proxy_pass http://auth.api:3001/Auth;
-        proxy_http_version  1.1;
-        proxy_redirect      default;
-        proxy_set_header    Upgrade $http_upgrade;
-        proxy_set_header    Connection "upgrade";
-        proxy_set_header    Host $host;
-        proxy_set_header    X-Real-IP $remote_addr;
-        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Host $server_name;
-
-        proxy_hide_header 'Access-Control-Allow-Origin';
-
-         # Preflighted requests
-        if ($request_method = OPTIONS ) {
-            add_header 'Access-Control-Max-Age' 86400;
-            add_header 'Cache-Control' "public, max-age=86400";
-            add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
-            add_header 'Access-Control-Allow-Credentials' 'true' always;
-            add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
-            return 200;
-        }
-    }
- 
-    location /Meals {
-        limit_req zone=mylimit;
-
-        proxy_pass http://meals.api:3003/Meals;
-        proxy_http_version  1.1;
-        proxy_redirect      default;
-        proxy_set_header    Upgrade $http_upgrade;
-        proxy_set_header    Connection "upgrade";
-        proxy_set_header    Host $host;
-        proxy_set_header    X-Real-IP $remote_addr;
-        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Host $server_name;
-        proxy_hide_header 'Access-Control-Allow-Origin';
-        
-       if ($request_method = OPTIONS ) {
-            add_header 'Access-Control-Max-Age' 86400;
-            add_header 'Cache-Control' "public, max-age=86400";
-            add_header 'Access-Control-Allow-Origin' $allow_origin always;
-            add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, DELETE, PATCH, HEAD";
-            add_header 'Access-Control-Allow-Credentials' 'true' always;
-            add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
-            return 200;
-        } 
-    }
-
-    location /Posts {
-        limit_req zone=mylimit;
-        
-        proxy_pass http://posts.api:3004/Posts;
+    location /api {
+        proxy_pass http://web.api-gw:4002/api;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;
@@ -89,10 +36,8 @@ server {
         }
     }
 
-    location /Follows {
-        limit_req zone=mylimit;
-        
-        proxy_pass http://follows.api:3002/Follows;
+    location /admin {
+        proxy_pass http://admin.api-gw:4001/admin;
         proxy_http_version  1.1;
         proxy_redirect      default;
         proxy_set_header    Upgrade $http_upgrade;

@@ -108,20 +108,30 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  # webapigw:
-  #   container_name: webapigw
-  #   depends_on:
-  #     - auth.api
-  #     - category.api
-  #     - meals.api
-  #     - posts.api
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #   ports:
-  #     - "8010:80"
+  admin.api-gw:
+    container_name: admin.api-gw 
+    depends_on:
+      - auth.api
+      - meals.api
+      - posts.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "9001:4001"
 
-  nginx-gw:
-    container_name: nginx-gw 
+  web.api-gw:
+    container_name: web.api-gw 
+    depends_on:
+      - auth.api
+      - meals.api
+      - posts.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "9002:4002"
+
+  nginx:
+    container_name: nginx
     depends_on:
       - auth.api
       - meals.api
