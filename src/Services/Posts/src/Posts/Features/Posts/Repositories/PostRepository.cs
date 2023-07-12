@@ -28,7 +28,7 @@ public class PostRepository : RepositoryBase<Post>, IPostRepository
         var totalItemsSql = "SELECT COUNT(id) FROM posts";
 
         if(!string.IsNullOrEmpty(search))
-            sql += $" WHERE LOWER(content) LIKE '%{search.ToLower()}%' AND LOWER(up.username) LIKE '%{search.ToLower()}%'";
+            sql += $" WHERE LOWER(content) LIKE '%{search.ToLower()}%' OR LOWER(up.username) LIKE '%{search.ToLower()}%'";
 
         sql += sortOrder == "desc" ? $" ORDER BY {GetColumn(sortColumn)} DESC" : $" ORDER BY {GetColumn(sortColumn)}";
 
