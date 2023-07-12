@@ -55,11 +55,13 @@ public class FollowRepository : RepositoryBase<Entities.Follows>, IFollowReposit
 
         var ffQuery = query
             .AsNoTracking()
+            .Include(x => x.Follower)
+            .Include(x => x.Followee)
             .Where(x => isFollowers ? x.FolloweeId.ToString() == userId : x.FollowerId.ToString() == userId)
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => isFollowers ? 
-                new UserDto(x.FollowerId, x.FollowerName) : 
-                new UserDto(x.FolloweeId, x.FolloweeName));
+                new UserDto(x.FollowerId, x.Follower!.Username) : 
+                new UserDto(x.FolloweeId, x.Followee!.Username));
 
         var totalItemsCount = await ffQuery.CountAsync(); 
         

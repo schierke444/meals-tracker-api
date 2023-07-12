@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Follows.Migrations
 {
     [DbContext(typeof(FollowDbContext))]
-    [Migration("20230709220956_DbInit")]
+    [Migration("20230712010631_DbInit")]
     partial class DbInit
     {
         /// <inheritdoc />
@@ -40,19 +40,9 @@ namespace Follows.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("followee_id");
 
-                    b.Property<string>("FolloweeName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("followee_name");
-
                     b.Property<Guid>("FollowerId")
                         .HasColumnType("uuid")
                         .HasColumnName("follower_id");
-
-                    b.Property<string>("FollowerName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("follower_name");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -60,7 +50,54 @@ namespace Follows.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FolloweeId");
+
+                    b.HasIndex("FollowerId");
+
                     b.ToTable("follows");
+                });
+
+            modelBuilder.Entity("Follows.Entities.UsersFollows", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("users_follows");
+                });
+
+            modelBuilder.Entity("Follows.Entities.Follows", b =>
+                {
+                    b.HasOne("Follows.Entities.UsersFollows", "Followee")
+                        .WithMany("Followers")
+                        .HasForeignKey("FolloweeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Follows.Entities.UsersFollows", "Follower")
+                        .WithMany("Followings")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Followee");
+
+                    b.Navigation("Follower");
+                });
+
+            modelBuilder.Entity("Follows.Entities.UsersFollows", b =>
+                {
+                    b.Navigation("Followers");
+
+                    b.Navigation("Followings");
                 });
 #pragma warning restore 612, 618
         }
