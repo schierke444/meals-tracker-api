@@ -13,4 +13,5 @@ public class UsersPosts
     [Column("username")] 
     public required string Username { get; set; }
     public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<LikedPosts> LikedPosts { get; set; } = new List<LikedPosts>();
 }

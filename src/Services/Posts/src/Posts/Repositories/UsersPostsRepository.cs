@@ -1,8 +1,9 @@
 using BuildingBlocks.Commons.Interfaces;
+using Posts.Commons.Interfaces;
 using Posts.Entities;
-using Posts.Features.Posts.Dtos;
-using Posts.Features.Posts.Repositories;
 using Posts.Persistence;
+
+namespace Posts.Repositories;
 
 public class UsersPostsRepository : IUsersPostsRepository
 {

@@ -2,9 +2,9 @@
 using BuildingBlocks.Events.Users;
 using BuildingBlocks.Services;
 using MassTransit;
+using Posts.Commons.Interfaces;
 using Posts.Entities;
 using Posts.Features.Posts.Interfaces;
-using Posts.Features.Posts.Repositories;
 
 namespace Posts.Features.Posts.Commands.CreatePost.v1;
 
@@ -14,12 +14,14 @@ sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand, Guid>
     private readonly IUsersPostsRepository _usersPostsRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IRequestClient<GetUserByIdRecord> _client;
-    public CreatePostCommandHandler(IPostRepository postRepository, IRequestClient<GetUserByIdRecord> client, ICurrentUserService currentUserService, IUsersPostsRepository usersPostsRepository)
+    private readonly IUsersPostsService _usersPostsService;
+    public CreatePostCommandHandler(IPostRepository postRepository, IRequestClient<GetUserByIdRecord> client, ICurrentUserService currentUserService, IUsersPostsRepository usersPostsRepository, IUsersPostsService usersPostsService)
     {
         _postRepository = postRepository;
         _client = client;
         _currentUserService = currentUserService;
         _usersPostsRepository = usersPostsRepository;
+        _usersPostsService = usersPostsService;
     }
     public async Task<Guid> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
@@ -29,26 +31,7 @@ sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand, Guid>
 
         var existingUsersPosts = await _usersPostsRepository.GetUserById(user.Message.Id);
 
-        // if no users_posts record, make a new one, then assigned to usersPosts;
-        // else assign to usersPosts
-        UsersPosts usersPosts;
-        if(existingUsersPosts is null)
-        {
-            UsersPosts newUsersPosts = new()
-            {
-                UserId = user.Message.Id,
-                Username = user.Message.Username
-            };
-
-            await _usersPostsRepository.Add(newUsersPosts);
-            await _usersPostsRepository.SaveChangesAsync();
-
-            usersPosts = newUsersPosts;
-        }
-        else 
-        {
-            usersPosts = existingUsersPosts;
-        } 
+        var usersPosts = await _usersPostsService.CreateUsersRecord(user.Message.Id, user.Message.Username);
 
         Post newPost = new()
         {

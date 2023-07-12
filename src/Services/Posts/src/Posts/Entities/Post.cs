@@ -11,4 +11,5 @@ public sealed class Post : BaseEntity
     [Column("owner_id")]
     public Guid OwnerId { get; set; }
     public UsersPosts? UsersPosts { get; set; }
+    public ICollection<LikedPosts> Likes { get; set; } = new List<LikedPosts>();
 }

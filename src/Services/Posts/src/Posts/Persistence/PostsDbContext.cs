@@ -9,6 +9,7 @@ namespace Posts.Persistence;
 public class PostsDbContext : ApplicationDbContextBase
 {
     public DbSet<Post> Posts => Set<Post>();
+    public DbSet<LikedPosts> LikedPosts => Set<LikedPosts>();
     public DbSet<UsersPosts> UsersPosts => Set<UsersPosts>();
     public PostsDbContext(IConfiguration config) : base(config)
     {

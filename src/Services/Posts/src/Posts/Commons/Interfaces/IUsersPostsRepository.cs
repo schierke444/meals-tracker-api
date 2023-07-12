@@ -1,7 +1,6 @@
 using Posts.Entities;
-using Posts.Features.Posts.Dtos;
 
-namespace Posts.Features.Posts.Repositories;
+namespace Posts.Commons.Interfaces;
 
 public interface IUsersPostsRepository
 {

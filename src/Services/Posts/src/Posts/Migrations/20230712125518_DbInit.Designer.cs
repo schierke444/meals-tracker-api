@@ -12,7 +12,7 @@ using Posts.Persistence;
 namespace Posts.Migrations
 {
     [DbContext(typeof(PostsDbContext))]
-    [Migration("20230711122321_DbInit")]
+    [Migration("20230712125518_DbInit")]
     partial class DbInit
     {
         /// <inheritdoc />
@@ -24,6 +24,38 @@ namespace Posts.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Posts.Entities.LikedPosts", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("liked_posts");
+                });
 
             modelBuilder.Entity("Posts.Entities.Post", b =>
                 {
@@ -73,6 +105,25 @@ namespace Posts.Migrations
                     b.ToTable("users_posts");
                 });
 
+            modelBuilder.Entity("Posts.Entities.LikedPosts", b =>
+                {
+                    b.HasOne("Posts.Entities.UsersPosts", "UsersPosts")
+                        .WithMany("LikedPosts")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Posts.Entities.Post", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("UsersPosts");
+                });
+
             modelBuilder.Entity("Posts.Entities.Post", b =>
                 {
                     b.HasOne("Posts.Entities.UsersPosts", "UsersPosts")
@@ -84,8 +135,15 @@ namespace Posts.Migrations
                     b.Navigation("UsersPosts");
                 });
 
+            modelBuilder.Entity("Posts.Entities.Post", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
             modelBuilder.Entity("Posts.Entities.UsersPosts", b =>
                 {
+                    b.Navigation("LikedPosts");
+
                     b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
