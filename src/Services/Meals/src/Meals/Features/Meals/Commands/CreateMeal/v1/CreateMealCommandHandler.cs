@@ -14,31 +14,35 @@ namespace Meals.Features.Meals.Commands.CreateMeal.v1;
 
 sealed class CreateMealCommandHandler : ICommandHandler<CreateMealCommand, Guid>
 {
+    private readonly IRequestClient<GetUserByIdRecord> _client;
     private readonly IMealsRepository _mealsRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IIngredientsRepository _ingredientsRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IMealIngredientsRepository _mealIngredientsRepository;
     private readonly IMealCategoryRepository _mealCategoryRepository;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IRequestClient<GetUserByIdRecord> _client;
-    private readonly MealCategoryService _mealCategoryService;
     private readonly MealIngredientsService _mealIngredientsService;
-    public CreateMealCommandHandler(IMealsRepository mealsRepository, ICurrentUserService currentUserService, IIngredientsRepository ingredientsRepository, IMealIngredientsRepository mealIngredientsRepository, IMealCategoryRepository mealCategoryRepository, IRequestClient<GetUserByIdRecord> client, ICategoryRepository categoryRepository, MealCategoryService mealCategoryService, MealIngredientsService mealIngredientsService)
+    private readonly MealCategoryService _mealCategoryService;
+    private readonly IUsersMealsService _usersMealsService;
+    public CreateMealCommandHandler(IRequestClient<GetUserByIdRecord> client, IMealsRepository mealsRepository, ICurrentUserService currentUserService, IIngredientsRepository ingredientsRepository, ICategoryRepository categoryRepository, IMealIngredientsRepository mealIngredientsRepository, IMealCategoryRepository mealCategoryRepository, MealIngredientsService mealIngredientsService, MealCategoryService mealCategoryService, IUsersMealsService usersMealsService)
     {
+        _client = client;
         _mealsRepository = mealsRepository;
         _currentUserService = currentUserService;
         _ingredientsRepository = ingredientsRepository;
+        _categoryRepository = categoryRepository;
         _mealIngredientsRepository = mealIngredientsRepository;
         _mealCategoryRepository = mealCategoryRepository;
-        _client = client;
-        _categoryRepository = categoryRepository;
-        _mealCategoryService = mealCategoryService;
         _mealIngredientsService = mealIngredientsService;
+        _mealCategoryService = mealCategoryService;
+        _usersMealsService = usersMealsService;
     }
 
     public async Task<Guid> Handle(CreateMealCommand request, CancellationToken cancellationToken)
     {
         var user = await _client.GetResponse<GetUserByIdResult>(new GetUserByIdRecord(_currentUserService.UserId ?? throw new UnauthorizedAccessException()));
+
+        // var existingUsersMeals = await _usersMealsRepository.GetUserById(user.Message.Id);
 
         var ingredientResult = _ingredientsRepository.VerifyIngredientsByIds(request.Ingredients);
         if(!ingredientResult)
@@ -48,15 +52,16 @@ sealed class CreateMealCommandHandler : ICommandHandler<CreateMealCommand, Guid>
         var categoryResult = _categoryRepository.VerifyCategoryByIds(request.Categories);
         if(!ingredientResult)
             throw new ConflictException("Invalid Category Ids");
-        
+
+        var usersMeals = await _usersMealsService.CreateUsersRecord(user.Message.Id, user.Message.Username);
+
         Meal newMeal = new()
         {
             MealName = request.MealName,
             MealReview = request.MealReview,
             Rating = request.Rating,
             Instructions = request.Instructions,
-            OwnerId = user.Message.Id,
-            OwnerName = user.Message.Username
+            OwnerId = usersMeals.UserId
         };
 
         await _mealsRepository.Add(newMeal);

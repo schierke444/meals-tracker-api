@@ -16,8 +16,8 @@ public class Meal : BaseEntity
     public required string Instructions { get; set; }
     [Column("owner_id")]
     public Guid OwnerId { get; set; }
-    [Column("owner_name")]
-    public required string OwnerName { get; set; }
+    public UsersMeals? UsersMeals { get; set; }
     public ICollection<MealCategory> MealCategories {get; set; } = new List<MealCategory>();
     public ICollection<MealIngredients> MealIngredient { get; set; } = new List<MealIngredients>();
+    public ICollection<LikedMeals> Likes { get; set; } = new List<LikedMeals>();
 }

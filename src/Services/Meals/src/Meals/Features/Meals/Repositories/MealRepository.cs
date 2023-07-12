@@ -30,14 +30,23 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
         return results;
     }
 
-    public async Task<object?> GetMealsById(string MealId)
+    public async Task<MealDetailsDto?> GetMealsById(string MealId, bool includeIngredients = true, bool includeCategory = true)
     {
-        return await _mealContext.Meals
-            .AsNoTracking()
-            .Include(x => x.MealCategories)
-            .ThenInclude(x => x.Category)
-            .Include(x => x.MealIngredient)
-            .ThenInclude(x => x.Ingredients)
+        IQueryable<Meal> query = _mealContext.Meals
+            .AsNoTracking();
+
+        if(includeIngredients)
+            query = query
+                .Include(x => x.MealIngredient)
+                .ThenInclude(x => x.Ingredients);
+
+        if(includeCategory)
+            query = query
+                .Include(x => x.MealCategories)
+                .ThenInclude(x => x.Category);
+
+        return await query
+            .Include(x => x.UsersMeals)
             .Where(x => x.Id.ToString() == MealId)
             .Select(x => new MealDetailsDto(
                 x.Id,
@@ -47,7 +56,7 @@ public sealed class MealsRepository : RepositoryBase<Meal>, IMealsRepository
                 x.Instructions,
                 x.MealIngredient.Select(x => new IngredientsWithAmountDto(x.IngredientId, x.Ingredients!.Name, x.Amount)),
                 x.MealCategories.Select(x => new CategoryDto(x.CategoryId, x.Category!.Name)),
-                new UserDetailsDto(x.OwnerId, x.OwnerName),
+                new UserDetailsDto(x.OwnerId, x.UsersMeals!.Username),
                 x.CreatedAt
             )).FirstOrDefaultAsync();        
     }

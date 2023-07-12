@@ -12,7 +12,8 @@ public class MealsDbContext : ApplicationDbContextBase
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     public DbSet<Entities.Category> Categories => Set<Entities.Category>();
     public DbSet<MealCategory> MealCategories => Set<MealCategory>(); 
-    public DbSet<MealIngredients> MealIngredients => Set<MealIngredients>(); 
+    public DbSet<MealIngredients> MealIngredients => Set<MealIngredients>();
+    public DbSet<UsersMeals> UsersMeals => Set<UsersMeals>();
     public MealsDbContext(IConfiguration config) : base(config)
     {
     }

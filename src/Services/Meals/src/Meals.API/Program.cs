@@ -1,4 +1,3 @@
-using MassTransit;
 using Meals.Extensions;
 using Newtonsoft.Json;
 using Serilog;

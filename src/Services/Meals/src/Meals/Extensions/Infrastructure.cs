@@ -10,13 +10,17 @@ using Meals.Features.Category;
 using Meals.Features.Category.Repositories;
 using Meals.Features.Ingredients.Interfaces;
 using Meals.Features.Ingredients.Repositories;
+using Meals.Features.Likes.Interfaces;
+using Meals.Features.Likes.Repositories;
 using Meals.Features.Meals.Interfaces;
 using Meals.Features.Meals.Repositories;
 using Meals.Features.Meals.Services;
 using Meals.Persistence;
 using Meals.Repositories;
+using Meals.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Posts.Repositories;
 
 namespace Meals.Extensions;
 
@@ -33,6 +37,9 @@ public static class Infrastructure
         services.AddScoped<IMealIngredientsRepository, MealIngredientsRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IMealCategoryRepository, MealCategoryRepository>();
+        services.AddScoped<IUsersMealsRepository, UsersMealsRepository>();
+        services.AddScoped<ILikeMealsRepository, LikeMealsRepository>();
+        services.AddTransient<IUsersMealsService, UsersMealsService>();
         services.AddTransient<MealCategoryService>();
         services.AddTransient<MealIngredientsService>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
