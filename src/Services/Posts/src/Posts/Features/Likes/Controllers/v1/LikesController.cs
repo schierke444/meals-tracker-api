@@ -12,9 +12,9 @@ namespace Posts.Features.Likes.Controllers.v1;
 
 [ApiVersion(1.0)]
 [Authorize]
-public class PostsController : BaseController
+public class LikesController : BaseController
 {
-    public PostsController(IMediator mediator) : base(mediator)
+    public LikesController(IMediator mediator) : base(mediator)
     {
     }
     

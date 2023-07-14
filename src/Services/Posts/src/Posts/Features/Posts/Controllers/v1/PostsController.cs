@@ -18,6 +18,7 @@ using Posts.Features.Posts.Queries.GetPostsByOwnerId.v1;
 namespace Posts.Features.Posts.Controllers;
 
 [ApiVersion(1.0)]
+[Route("")]
 public class PostsController : BaseController
 {
     public PostsController(IMediator mediator) : base(mediator)

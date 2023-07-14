@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Meals.Features.Category.Controllers.v1;
 
 [ApiVersion(1.0)]
-[Route($"Meals/category")]
+[Route("category")]
 public class CategoryController : BaseController
 {
     public CategoryController(IMediator mediator) : base(mediator)

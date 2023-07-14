@@ -21,6 +21,7 @@ public static class Infrastructure
     {
         services.AddCustomDbContext<ApplicationDbContext>(config);
         services.AddJwtExtensions(config);
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IPgsqlDbContext, PgsqlDbContext>();
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IRolesRepository, RolesRepository>();

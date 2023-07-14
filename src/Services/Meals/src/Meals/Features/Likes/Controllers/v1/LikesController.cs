@@ -12,7 +12,6 @@ namespace Posts.Features.Likes.Controllers.v1;
 
 [ApiVersion(1.0)]
 [Authorize]
-[Route("Meals")]
 public class LikesController : BaseController
 {
     public LikesController(IMediator mediator) : base(mediator)

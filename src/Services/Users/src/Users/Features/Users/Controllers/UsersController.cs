@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Users.Features.Users.Controllers;
 
-[Route("v1/[controller]")]
 [Authorize]
+[Route("")]
 public class UsersController : BaseController
 {
     public UsersController(IMediator mediator) : base(mediator)
