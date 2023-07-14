@@ -78,6 +78,21 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
+  comments.api:
+    container_name: comments.api
+    depends_on:
+      - appdb
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DB=Host=${DB_HOST}:${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
+      - "EventBusSettings:HostAddress=${RABBITMQ_URL}"
+    ports:
+      - "8006:3006"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
   users.api:
     container_name: users.api
     depends_on:

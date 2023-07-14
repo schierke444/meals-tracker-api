@@ -3,6 +3,7 @@ using BuildingBlocks.Commons.Exceptions;
 using BuildingBlocks.Commons.Models;
 using BuildingBlocks.Services;
 using BuildingBlocks.Web;
+using MassTransit;
 using Meals.Features.Meals.Commands.CreateMeal.v1;
 using Meals.Features.Meals.Commands.DeleteMealById.v1;
 using Meals.Features.Meals.Commands.UpdateMeal.v1;
@@ -18,6 +19,7 @@ namespace Meals.Features.Meals.Controllers.v1;
 
 [ApiVersion(1.0)]
 [Authorize]
+[Route("")]
 public class MealsController : BaseController 
 {
     private readonly ICurrentUserService _currentUserService;
@@ -26,8 +28,9 @@ public class MealsController : BaseController
         _currentUserService = currentUserService;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<PaginatedResults<MealDetailsDto>>> GetMeals(
+    [HttpGet("users/{ownerId}/meals")]
+    public async Task<ActionResult<PaginatedResults<MealDetailsDto>>> GetMealsByOwnerId(
+        string ownerId,
         string? search,
         string? sortColumn,
         string? sortOrder,
@@ -37,12 +40,8 @@ public class MealsController : BaseController
     {
         try
         {
-            var userId = _currentUserService.UserId;
-            if(userId is null)
-                return Unauthorized();
-
             var request = new GetMealsByOwnerIdQuery(
-                userId, 
+                ownerId, 
                 search,
                 sortColumn,
                 sortOrder,
@@ -55,15 +54,18 @@ public class MealsController : BaseController
         }
         catch(Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            return ex switch {
+                RequestFaultException requestFault => BadRequest(new {message = requestFault.Message}),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message })
+            };
         }
     }
 
     [HttpGet("{mealId}", Name = "GetMealById")]
     public async Task<ActionResult<MealDetailsDto>> GetMealById(
         string mealId, 
-        [FromQuery]bool includeIngredients = true,
-        [FromQuery]bool includeCategory = true,
+        [FromQuery]bool includeIngredients,
+        [FromQuery]bool includeCategory,
         CancellationToken cancellationToken = default)
     {
         try

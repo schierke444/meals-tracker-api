@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Follows.Features.Controllers.v1;
 
 [ApiVersion(1.0)]
+[Route("")]
 public class FollowsController : BaseController
 {
     public FollowsController(IMediator mediator) : base(mediator)

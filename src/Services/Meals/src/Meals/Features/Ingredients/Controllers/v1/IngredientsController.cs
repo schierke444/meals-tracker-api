@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ingredients.API.Controllers;
 
 [ApiVersion(1.0)]
-[Route($"Meals/ingredients")]
+[Route("ingredients")]
 public class IngredientsController : BaseController 
 {
     public IngredientsController(IMediator mediator) : base(mediator)

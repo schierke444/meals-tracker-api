@@ -36,6 +36,12 @@ services:
     build:
       context: .
       dockerfile: src/Services/Posts/src/Posts.API/Dockerfile
+  
+  comments.api:
+    image: ${DOCKER_REGISTRY-}commentsapi
+    build:
+      context: .
+      dockerfile: src/Services/Comments/src/Comments.API/Dockerfile
 
   follows.api:
     image: ${DOCKER_REGISTRY-}followsapi
